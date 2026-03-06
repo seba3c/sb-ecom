@@ -18,6 +18,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew test --tests "com.ecommerce.project.SbEcomApplicationTests"
 ```
 
+## Git Workflow
+
+Every codebase change must be done in a new branch — never commit directly to `main`.
+
 ## Git Branch Naming
 
 Branches must follow this pattern: `<type>/<numeric_id>_<branch-name>`
