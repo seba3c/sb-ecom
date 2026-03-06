@@ -18,6 +18,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew test --tests "com.ecommerce.project.SbEcomApplicationTests"
 ```
 
+## Git Branch Naming
+
+Branches must follow this pattern: `<type>/<numeric_id>_<branch-name>`
+
+- **`<type>`** — one of: `feature`, `fix`
+- **`<numeric_id>`** — issue or ticket number (e.g. `42`)
+- **`<branch-name>`** — short kebab-case description
+
+Examples:
+```
+feature/42_add-product-entity
+fix/7_category-update-stub
+```
+
 ## Architecture
 
 Spring Boot 4.0 REST API (Java 21) with a layered architecture:
