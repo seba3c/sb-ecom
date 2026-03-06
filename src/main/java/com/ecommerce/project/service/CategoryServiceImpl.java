@@ -15,18 +15,18 @@ public class CategoryServiceImpl implements CategoryService {
     private Long nextId = 1L;
 
     @Override
-    public List<Category> list() {
+    public List<Category> getAllCategories() {
         return categories;
     }
 
     @Override
-    public void create(Category category) {
+    public void createCategory(Category category) {
         category.setId(nextId++);
         categories.add(category);
     }
 
     @Override
-    public String delete(Long id) {
+    public String deleteCategory(Long id) {
         boolean removed = categories.removeIf(category -> category.getId().equals(id));
         if (removed) {
             return "Category with id " + id + " deleted successfully";
@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category update(Long id, Category category) {
+    public Category updateCategory(Long id, Category category) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
     }
 }
