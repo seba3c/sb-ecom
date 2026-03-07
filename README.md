@@ -1,5 +1,5 @@
 # sb-ecom
-Spring Boot learning project
+Java Spring Boot + Claude Code learning project
 
 I am using this Java Spring Boot based project to follow the course https://github.com/EmbarkXOfficial/spring-boot-course
 
