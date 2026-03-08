@@ -23,6 +23,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-h2console")
     implementation("org.projectlombok:lombok")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
