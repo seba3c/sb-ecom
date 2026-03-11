@@ -51,7 +51,6 @@ Spring Boot 4.0 REST API (Java 21) with a layered architecture:
 ### Current state
 
 - No database or JPA — data is held in memory and lost on restart
-- `CategoryServiceImpl.update()` is not yet implemented (throws 404)
 - No Spring Security configured despite the public/admin URL split
 
 ### API Endpoints
@@ -61,4 +60,4 @@ Spring Boot 4.0 REST API (Java 21) with a layered architecture:
 | GET    | `/api/public/categories`     | List all categories      |
 | POST   | `/api/public/categories`     | Create a category        |
 | DELETE | `/api/admin/categories/{id}` | Delete a category        |
-| PUT    | `/api/admin/categories/{id}` | Update a category (stub) |
+| PUT    | `/api/admin/categories/{id}` | Update a category        |
