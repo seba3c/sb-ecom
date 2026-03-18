@@ -24,6 +24,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-h2console")
     implementation("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.modelmapper:modelmapper:3.2.6")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
