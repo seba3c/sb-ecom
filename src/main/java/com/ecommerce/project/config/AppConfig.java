@@ -11,4 +11,12 @@ public class AppConfig {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
+    public static class Pagination {
+        public static final Integer PAGE_NUMBER = 0;
+        public static final Integer PAGE_SIZE = 50;
+        public static final String SORT_CATEGORIES_BY = "id";
+        public static final String SORT_CATEGORIES_DIR = "asc";
+    }
+
 }
