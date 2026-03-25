@@ -20,8 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Git Workflow
 
-Every codebase change must be done in a new branch — never commit directly to `main`, except
-that it is explicitly intructed to do it.
+Changes can be made directly to the `main` branch, except that a branch is needed explicitly.
 
 ## Git Branch Naming
 
@@ -55,9 +54,9 @@ Spring Boot 4.0 REST API (Java 21) with a layered architecture:
 
 ### API Endpoints
 
-| Method | Path                         | Description              |
-|--------|------------------------------|--------------------------|
-| GET    | `/api/public/categories`     | List all categories      |
-| POST   | `/api/public/categories`     | Create a category        |
-| DELETE | `/api/admin/categories/{id}` | Delete a category        |
-| PUT    | `/api/admin/categories/{id}` | Update a category        |
+| Method | Path                         | Description         |
+|--------|------------------------------|---------------------|
+| GET    | `/api/public/categories`     | List all categories |
+| POST   | `/api/public/categories`     | Create a category   |
+| DELETE | `/api/admin/categories/{id}` | Delete a category   |
+| PUT    | `/api/admin/categories/{id}` | Update a category   |
