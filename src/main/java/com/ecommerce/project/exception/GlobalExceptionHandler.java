@@ -1,6 +1,6 @@
-package com.ecommerce.project.exceptions;
+package com.ecommerce.project.exception;
 
-import com.ecommerce.project.payload.APIResponse;
+import com.ecommerce.project.dto.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

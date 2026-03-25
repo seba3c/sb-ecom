@@ -1,9 +1,9 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.exceptions.APIException;
-import com.ecommerce.project.exceptions.ResourceNotFoundException;
-import com.ecommerce.project.payload.CategoryDTO;
-import com.ecommerce.project.payload.CategoryResponse;
+import com.ecommerce.project.exception.APIException;
+import com.ecommerce.project.exception.ResourceNotFoundException;
+import com.ecommerce.project.dto.CategoryDTO;
+import com.ecommerce.project.dto.CategoryResponse;
 import com.ecommerce.project.service.CategoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
