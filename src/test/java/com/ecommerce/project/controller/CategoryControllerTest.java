@@ -38,8 +38,8 @@ class CategoryControllerTest {
         CategoryResponse response = new CategoryResponse(List.of(
                 new CategoryDTO(1L, "Electronics"),
                 new CategoryDTO(2L, "Clothing")
-        ));
-        when(categoryService.getAllCategories()).thenReturn(response);
+        ), 0, 50, 2L, 1, true);
+        when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(response);
 
         mockMvc.perform(get("/api/public/categories"))
                 .andExpect(status().isOk())
@@ -51,7 +51,7 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_empty_returns200() throws Exception {
-        when(categoryService.getAllCategories()).thenReturn(new CategoryResponse(List.of()));
+        when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(new CategoryResponse(List.of(), 0, 50, 0L, 0, true));
 
         mockMvc.perform(get("/api/public/categories"))
                 .andExpect(status().isOk())

@@ -12,6 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,11 +48,12 @@ class CategoryServiceImplTest {
         CategoryDTO dto1 = new CategoryDTO(1L, "Electronics");
         CategoryDTO dto2 = new CategoryDTO(2L, "Clothing");
 
-        when(categoryRepository.findAll()).thenReturn(List.of(cat1, cat2));
+        Page<Category> page = new PageImpl<>(List.of(cat1, cat2));
+        when(categoryRepository.findAll(any(Pageable.class))).thenReturn(page);
         when(modelMapper.map(cat1, CategoryDTO.class)).thenReturn(dto1);
         when(modelMapper.map(cat2, CategoryDTO.class)).thenReturn(dto2);
 
-        CategoryResponse response = categoryService.getAllCategories();
+        CategoryResponse response = categoryService.getAllCategories(0, 50, "id", "asc");
 
         assertEquals(2, response.getContent().size());
         assertEquals("Electronics", response.getContent().get(0).getName());
@@ -58,9 +62,9 @@ class CategoryServiceImplTest {
 
     @Test
     void getAllCategories_emptyList_returnsEmptyContent() {
-        when(categoryRepository.findAll()).thenReturn(List.of());
+        when(categoryRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());
 
-        CategoryResponse response = categoryService.getAllCategories();
+        CategoryResponse response = categoryService.getAllCategories(0, 50, "id", "asc");
 
         assertTrue(response.getContent().isEmpty());
     }
