@@ -37,6 +37,10 @@ feature/42_add-product-entity
 fix/7_category-update-stub
 ```
 
+## Java/Spring Boot Conventions
+
+> **Override:** Despite the `java-springboot` skill recommending feature/domain-based package structure, this project uses **layer-based packaging** (e.g., `controller/`, `service/`, `model/`, `repository/`) because it is small and a flat layer structure is simpler to navigate.
+
 ## Architecture
 
 Spring Boot 4.0 REST API (Java 21) with a layered architecture:
