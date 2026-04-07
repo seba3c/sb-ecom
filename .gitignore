@@ -60,3 +60,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+.gemini/
+gha-creds-*.json
