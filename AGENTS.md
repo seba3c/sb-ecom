@@ -33,7 +33,9 @@ src/main/java/com/ecommerce/project/
 
 ## Git Branch Naming
 
-`<type>/<numeric_id>_<branch-name>` (e.g., `feature/42_add-product-entity`)
+`<ai_tool_name>/<type>/<branch-name>` (e.g., `gemini/feature/add-product-entity`)
+
+Where <ai_tool_name> is the name of the AI tool executing, i.e., claude, gemini, codex, open_code, etc.
 
 ## Testing
 
