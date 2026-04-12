@@ -14,7 +14,7 @@ public class Product {
     private Long id;
 
     @NotBlank(message = "Product name must not be blank")
-    @Size(min = 5, message = "Product name must have at least 4 characters")
+    @Size(min = 5, message = "Product name must have at least 5 characters")
     @Column(unique = true)
     private String name;
 
