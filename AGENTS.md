@@ -33,7 +33,47 @@ src/main/java/com/ecommerce/project/
 
 ## Git Branch Naming
 
-`<type>/<numeric_id>_<branch-name>` (e.g., `feature/42_add-product-entity`)
+`<ai_tool_name>/<type>/<branch-name>` (e.g., `gemini/feature/add-product-entity`)
+
+Where <ai_tool_name> is the name of the AI tool executing, i.e., claude, gemini, codex, open_code, etc.
+
+## Branching Rules
+
+- **Never commit directly to `main`.** All new features, bug fixes, and changes must be implemented on a dedicated branch.
+- Create a branch before making any code changes.
+- Open a pull request to merge changes back into `main`.
+
+## Commit Message Format
+
+Commit messages must include the AI tool name and the model used in the footer:
+
+```
+<type>: <short description>
+
+<optional body>
+
+AI-Tool: <tool-name> (<model-id>)
+```
+
+If the changes were authored by one model but executed (e.g., applied, run, or reviewed) by a different model, list both:
+
+```
+AI-Tool: <tool-name> (<authoring-model-id>) / <tool-name> (<executing-model-id>)
+```
+
+Examples:
+
+```
+feat: add product search endpoint
+
+AI-Tool: claude (claude-sonnet-4-6)
+```
+
+```
+fix: correct category validation logic
+
+AI-Tool: gemini (gemini-2.5-pro) / claude (claude-sonnet-4-6)
+```
 
 ## Testing
 
