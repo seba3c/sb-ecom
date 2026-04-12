@@ -1,1 +1,0 @@
-This is a dummy file used to verify the branch naming and commit message format conventions defined in AGENTS.md.
