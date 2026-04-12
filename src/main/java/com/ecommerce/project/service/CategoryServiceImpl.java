@@ -45,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryPage.getSize(),
                 categoryPage.getTotalElements(),
                 categoryPage.getTotalPages(),
-                categoryPage.isLast()
+                !categoryPage.isLast()
         );
     }
 
