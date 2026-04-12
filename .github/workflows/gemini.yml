@@ -2,17 +2,19 @@ name: Gemini CLI
 
 on:
   issue_comment:
-    types: [created]
+    types: [ created ]
   pull_request_review_comment:
-    types: [created]
+    types: [ created ]
 
 jobs:
   gemini:
-    # Only run if '@gemini' is in the comment body
+    # Only run if '/gemini' is in the comment body
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@gemini')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@gemini'))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/gemini')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '/gemini'))
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: read
       pull-requests: write
@@ -20,14 +22,14 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Note: You can check for @v5 or @v6 if available in your environment
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install Gemini CLI
         run: npm install -g @google/gemini-cli
