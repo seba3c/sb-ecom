@@ -35,11 +35,12 @@ src/main/java/com/ecommerce/project/
 
 `<ai_tool_name>/<type>/<branch-name>` (e.g., `gemini/feature/add-product-entity`)
 
-Where <ai_tool_name> is the name of the AI tool executing, i.e., claude, gemini, codex, open_code, etc.
+Where <ai_tool_name> is the name of the AI tool executing, i.e., claude, gemini, codex, opencode, etc.
 
 ## Branching Rules
 
-- **Never commit directly to `main`.** All new features, bug fixes, and changes must be implemented on a dedicated branch.
+- **Never commit directly to `main`.** All new features, bug fixes, and changes must be implemented on a dedicated
+  branch.
 - Create a branch before making any code changes.
 - Open a pull request to merge changes back into `main`.
 
@@ -55,7 +56,8 @@ Commit messages must include the AI tool name and the model used in the footer:
 AI-Tool: <tool-name> (<model-id>)
 ```
 
-If the changes were authored by one model but executed (e.g., applied, run, or reviewed) by a different model, list both:
+If the changes were authored by one model but executed (e.g., applied, run, or reviewed) by a different model, list
+both:
 
 ```
 AI-Tool: <tool-name> (<authoring-model-id>) / <tool-name> (<executing-model-id>)
