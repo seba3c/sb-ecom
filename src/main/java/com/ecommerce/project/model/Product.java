@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Entity(name = "products")
+@Entity
+@Table(name = "products")
 @Data
 public class Product {
 
@@ -30,5 +31,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private User seller;
 
 }
