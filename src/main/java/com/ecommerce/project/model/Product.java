@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-@Entity(name = "products")
+@Entity
+@Table(name = "products")
 @Data
 public class Product {
 
