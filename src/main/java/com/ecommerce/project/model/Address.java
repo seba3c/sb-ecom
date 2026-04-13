@@ -20,17 +20,17 @@ public class Address {
     private Long id;
 
     @NotBlank
-    @Size(min = 5, message = "Street name must have at least 5 characters")
+    @Size(min = 1, message = "Street name must have at least 1 characters")
     private String streetLine1;
 
     private String streetLine2;
 
     @NotBlank
-    @Size(min = 5, message = "City name must have at least 5 characters")
+    @Size(min = 3, message = "City name must have at least 3 characters")
     private String city;
 
     @NotBlank
-    @Size(min = 5, message = "State name must have at least 5 characters")
+    @Size(min = 3, message = "State name must have at least 3 characters")
     private String state;
 
     @NotBlank
