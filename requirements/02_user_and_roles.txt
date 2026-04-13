@@ -5,7 +5,7 @@ User (table = users)
 * id - generated value
 * username - max length 20, unique
 * email - max length 50, unique
-* password - max length 20
+* password - max length 120
 
 Role (table = roles)
 * id - generated value
