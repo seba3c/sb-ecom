@@ -22,4 +22,8 @@ public class Role {
     @ToString.Exclude
     private AppRole name;
 
+    public Role(AppRole name) {
+        this.name = name;
+    }
+
 }

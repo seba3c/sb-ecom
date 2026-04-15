@@ -58,4 +58,10 @@ public class User {
     @ToString.Exclude
     private List<Address> addresses = new ArrayList<>();
 
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
+
 }
