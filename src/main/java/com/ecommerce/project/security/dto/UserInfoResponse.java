@@ -9,12 +9,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    private String jwtToken;
-
+public class UserInfoResponse {
+    private Long id;
     private String username;
     private List<String> roles;
-
+    private String jwtToken;
 }
 
 
