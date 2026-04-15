@@ -99,41 +99,29 @@ public class AuthController {
                 encoder.encode(signupRequest.getPassword())
         );
 
-        Set<String> strRoles = signupRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(AppRole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(AppRole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-
-                        break;
-                    case "seller":
-                        Role modRole = roleRepository.findByName(AppRole.ROLE_SELLER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(modRole);
-
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(AppRole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
-        }
-
-        user.setRoles(roles);
+        user.setRoles(resolveRoles(signupRequest.getRoles()));
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-
+    private Set<Role> resolveRoles(Set<String> strRoles) {
+        Set<Role> roles = new HashSet<>();
+        if (strRoles == null) {
+            roles.add(roleRepository.findByName(AppRole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin" -> roles.add(roleRepository.findByName(AppRole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+                    case "seller" -> roles.add(roleRepository.findByName(AppRole.ROLE_SELLER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+                    default -> roles.add(roleRepository.findByName(AppRole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+                }
+            });
+        }
+        return roles;
+    }
 }
