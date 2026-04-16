@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 
 @Component
 public class JwtValidator {
@@ -22,7 +21,7 @@ public class JwtValidator {
 
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parser().verifyWith((SecretKey) key()).build().parseSignedClaims(authToken);
+            Jwts.parser().verifyWith(key()).build().parseSignedClaims(authToken);
             return true;
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
@@ -36,7 +35,7 @@ public class JwtValidator {
         return false;
     }
 
-    private Key key() {
+    private SecretKey key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 }

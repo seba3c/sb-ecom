@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 
 @Component
 public class JwtParser {
@@ -29,12 +28,12 @@ public class JwtParser {
 
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser()
-                .verifyWith((SecretKey) key())
+                .verifyWith(key())
                 .build().parseSignedClaims(token)
                 .getPayload().getSubject();
     }
 
-    private Key key() {
+    private SecretKey key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 }

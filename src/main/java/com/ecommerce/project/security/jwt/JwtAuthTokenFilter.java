@@ -16,6 +16,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.JwtException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import java.io.IOException;
 
 @Component
@@ -49,8 +52,10 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
+        } catch (JwtException e) {
+            logger.error("Invalid JWT token: {}", e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            logger.error("User not found: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);
