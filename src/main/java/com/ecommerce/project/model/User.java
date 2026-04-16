@@ -40,7 +40,7 @@ public class User {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+            cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -57,5 +57,11 @@ public class User {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     private List<Address> addresses = new ArrayList<>();
+
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
 
 }
