@@ -132,19 +132,16 @@ public class WebSecurityConfig {
 
             // Create users if not already present, then assign roles
             for (SeedUserProperties.SeedUser seedUser : seedUserProperties.getSeedUsers()) {
-                if (!userRepository.existsByUsername(seedUser.getUsername())) {
-                    User user = new User(seedUser.getUsername(), seedUser.getEmail(),
-                            passwordEncoder.encode(seedUser.getPassword()));
-                    userRepository.save(user);
-                }
+                User user = userRepository.findByUsername(seedUser.getUsername())
+                        .orElseGet(() -> new User(seedUser.getUsername(), seedUser.getEmail(),
+                                passwordEncoder.encode(seedUser.getPassword()))
+                        );
 
-                userRepository.findByUsername(seedUser.getUsername()).ifPresent(user -> {
-                    Set<Role> roles = seedUser.getRoles().stream()
-                            .map(roleMap::get)
-                            .collect(Collectors.toSet());
-                    user.setRoles(roles);
-                    userRepository.save(user);
-                });
+                Set<Role> roles = seedUser.getRoles().stream()
+                        .map(roleMap::get)
+                        .collect(Collectors.toSet());
+                user.setRoles(roles);
+                userRepository.save(user);
             }
         };
     }
