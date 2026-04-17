@@ -293,4 +293,11 @@ class AuthControllerTest {
                 .andExpect(header().string("Set-Cookie", cleanCookie.toString()));
     }
 
+    @Test
+    void signout_withoutAuthentication_returns400() throws Exception {
+        mockMvc.perform(post("/api/auth/signout"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("No user signed in"));
+    }
+
 }

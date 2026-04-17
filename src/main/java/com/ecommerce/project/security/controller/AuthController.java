@@ -151,6 +151,10 @@ public class AuthController {
 
     @PostMapping("/signout")
     public ResponseEntity<?> signOut() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("No user signed in"));
+        }
         ResponseCookie jwtCookie = jwtUtils.generateJwtCleanCookie();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(new MessageResponse("User signed out successfully!"));
     }
