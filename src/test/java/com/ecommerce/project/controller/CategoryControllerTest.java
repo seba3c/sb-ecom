@@ -73,7 +73,7 @@ class CategoryControllerTest {
         CategoryDTO resultDTO = new CategoryDTO(1L, "Electronics");
         when(categoryService.createCategory(any(CategoryDTO.class))).thenReturn(resultDTO);
 
-        mockMvc.perform(post("/api/public/categories")
+        mockMvc.perform(post("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CategoryDTO(null, "Electronics"))))
                 .andExpect(status().isCreated())
@@ -86,7 +86,7 @@ class CategoryControllerTest {
         when(categoryService.createCategory(any(CategoryDTO.class)))
                 .thenThrow(new APIException("Category with the name Electronics already exists"));
 
-        mockMvc.perform(post("/api/public/categories")
+        mockMvc.perform(post("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CategoryDTO(null, "Electronics"))))
                 .andExpect(status().isBadRequest())

@@ -52,7 +52,7 @@ class JwtAuthTokenFilterTest {
         UserDetails userDetails = new User("alice", "pass",
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
-        when(jwtUtils.getJwtFromHeader(request)).thenReturn("validtoken");
+        when(jwtUtils.getJwtFromCookie(request)).thenReturn("validtoken");
         when(jwtUtils.validateJwtToken("validtoken")).thenReturn(true);
         when(jwtUtils.getUserNameFromJwtToken("validtoken")).thenReturn("alice");
         when(userDetailsService.loadUserByUsername("alice")).thenReturn(userDetails);
@@ -66,7 +66,7 @@ class JwtAuthTokenFilterTest {
 
     @Test
     void doFilterInternal_noJwt_doesNotSetAuthentication() throws Exception {
-        when(jwtUtils.getJwtFromHeader(request)).thenReturn(null);
+        when(jwtUtils.getJwtFromCookie(request)).thenReturn(null);
         when(request.getRequestURI()).thenReturn("/api/public/categories");
 
         filter.doFilterInternal(request, response, filterChain);
@@ -77,7 +77,7 @@ class JwtAuthTokenFilterTest {
 
     @Test
     void doFilterInternal_invalidJwt_doesNotSetAuthentication() throws Exception {
-        when(jwtUtils.getJwtFromHeader(request)).thenReturn("badtoken");
+        when(jwtUtils.getJwtFromCookie(request)).thenReturn("badtoken");
         when(jwtUtils.validateJwtToken("badtoken")).thenReturn(false);
         when(request.getRequestURI()).thenReturn("/api/test");
 

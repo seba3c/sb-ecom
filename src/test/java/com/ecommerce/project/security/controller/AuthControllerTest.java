@@ -13,24 +13,62 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@WithSecurityContext(factory = WithUserDetailsImplSecurityContextFactory.class)
+@interface WithUserDetailsImpl {
+    String username() default "alice";
+
+    long id() default 1L;
+
+    String[] roles() default {"ROLE_USER"};
+}
+
+class WithUserDetailsImplSecurityContextFactory implements WithSecurityContextFactory<WithUserDetailsImpl> {
+    @Override
+    public org.springframework.security.core.context.SecurityContext createSecurityContext(WithUserDetailsImpl annotation) {
+        List<SimpleGrantedAuthority> authorities = java.util.Arrays.stream(annotation.roles())
+                .map(SimpleGrantedAuthority::new)
+                .collect(java.util.stream.Collectors.toList());
+        UserDetailsImpl principal = new UserDetailsImpl(
+                annotation.id(),
+                annotation.username(),
+                annotation.username() + "@test.com",
+                "encoded",
+                authorities);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+        org.springframework.security.core.context.SecurityContext context =
+                org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(token);
+        return context;
+    }
+}
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
@@ -60,14 +98,17 @@ class AuthControllerTest {
     private UserDetailsServiceImpl userDetailsService;
 
     @Test
-    void signin_validCredentials_returns200WithToken() throws Exception {
+    void signin_validCredentials_returns200WithCookieAndUserInfo() throws Exception {
         UserDetailsImpl principal = new UserDetailsImpl(1L, "alice", "alice@example.com", "encoded",
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 
+        ResponseCookie jwtCookie = ResponseCookie.from("ecommerce-app", "jwt-token-here")
+                .path("/api").maxAge(86400).build();
+
         when(authenticationManager.authenticate(any())).thenReturn(auth);
-        when(jwtUtils.generateTokenFromUsername(principal)).thenReturn("jwt-token-here");
+        when(jwtUtils.generateJwtCookie(any(UserDetailsImpl.class))).thenReturn(jwtCookie);
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername("alice");
@@ -77,9 +118,9 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
+                .andExpect(header().exists("Set-Cookie"))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.username").value("alice"))
-                .andExpect(jsonPath("$.jwtToken").value("jwt-token-here"))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
     }
 
@@ -193,4 +234,70 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User registered successfully!"));
     }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void currentUsername_withAuthenticatedUser_returnsUsername() throws Exception {
+        mockMvc.perform(get("/api/auth/username"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("alice"));
+    }
+
+    @Test
+    void currentUsername_withoutAuthentication_returnsEmptyString() throws Exception {
+        mockMvc.perform(get("/api/auth/username"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void currentUserDetails_withAuthenticatedUser_returnsUserInfo() throws Exception {
+        mockMvc.perform(get("/api/auth/user"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.username").value("alice"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
+    }
+
+    @Test
+    void currentUserDetails_withoutAuthentication_returnsMessage() throws Exception {
+        mockMvc.perform(get("/api/auth/user"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("No user details found"));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void signout_withAuthenticatedUser_returns200AndMessage() throws Exception {
+        ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null)
+                .path("/api").build();
+
+        when(jwtUtils.generateJwtCleanCookie()).thenReturn(cleanCookie);
+
+        mockMvc.perform(post("/api/auth/signout"))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Set-Cookie"))
+                .andExpect(jsonPath("$.message").value("User signed out successfully!"));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void signout_returnsCleanCookie() throws Exception {
+        ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null)
+                .path("/api").build();
+
+        when(jwtUtils.generateJwtCleanCookie()).thenReturn(cleanCookie);
+
+        mockMvc.perform(post("/api/auth/signout"))
+                .andExpect(header().string("Set-Cookie", cleanCookie.toString()));
+    }
+
+    @Test
+    void signout_withoutAuthentication_returns400() throws Exception {
+        mockMvc.perform(post("/api/auth/signout"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("No user signed in"));
+    }
+
 }

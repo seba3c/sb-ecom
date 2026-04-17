@@ -13,7 +13,9 @@ import com.ecommerce.project.security.repository.UserRepository;
 import com.ecommerce.project.security.service.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,10 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,15 +66,19 @@ public class AuthController {
         UserDetailsImpl userDetails = Objects.requireNonNull(
                 (UserDetailsImpl) authentication.getPrincipal());
 
-        String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
+        UserInfoResponse response = getUserInfoResponse(userDetails);
 
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
+    }
+
+    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        UserInfoResponse response = new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles, jwtToken);
-
-        return ResponseEntity.ok(response);
+        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles);
     }
 
     @PostMapping("/signup")
@@ -124,4 +127,36 @@ public class AuthController {
         }
         return roles;
     }
+
+    @GetMapping("/username")
+    public String currentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        return "";
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> currentUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            UserDetailsImpl userDetails = Objects.requireNonNull(
+                    (UserDetailsImpl) authentication.getPrincipal());
+            UserInfoResponse response = getUserInfoResponse(userDetails);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.ok(new MessageResponse("No user details found"));
+    }
+
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOut() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("No user signed in"));
+        }
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCleanCookie();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(new MessageResponse("User signed out successfully!"));
+    }
+
 }

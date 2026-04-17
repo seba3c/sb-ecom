@@ -2,6 +2,7 @@ package com.ecommerce.project.security.jwt;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class JwtParserTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(jwtParser, "jwtSecret", SECRET);
+        ReflectionTestUtils.setField(jwtParser, "jwtCookie", "ecommerce-app");
     }
 
     private String buildToken(String username) {
@@ -74,5 +76,23 @@ class JwtParserTest {
         String username = jwtParser.getUserNameFromJwtToken(token);
 
         assertEquals("alice", username);
+    }
+
+    @Test
+    void getJwtFromCookie_withMatchingCookie_returnsToken() {
+        String token = buildToken("alice");
+        Cookie[] cookies = { new Cookie("ecommerce-app", token) };
+        when(request.getCookies()).thenReturn(cookies);
+
+        String result = jwtParser.getJwtFromCookie(request);
+
+        assertEquals(token, result);
+    }
+
+    @Test
+    void getJwtFromCookie_noCookies_returnsNull() {
+        when(request.getCookies()).thenReturn(null);
+
+        assertNull(jwtParser.getJwtFromCookie(request));
     }
 }
