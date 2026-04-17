@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.http.ResponseCookie;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,14 +63,17 @@ class AuthControllerTest {
     private UserDetailsServiceImpl userDetailsService;
 
     @Test
-    void signin_validCredentials_returns200WithToken() throws Exception {
+    void signin_validCredentials_returns200WithCookieAndUserInfo() throws Exception {
         UserDetailsImpl principal = new UserDetailsImpl(1L, "alice", "alice@example.com", "encoded",
                 List.of(new SimpleGrantedAuthority("ROLE_USER")));
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 
+        ResponseCookie jwtCookie = ResponseCookie.from("ecommerce-app", "jwt-token-here")
+                .path("/api").maxAge(86400).build();
+
         when(authenticationManager.authenticate(any())).thenReturn(auth);
-        when(jwtUtils.generateTokenFromUsername(principal)).thenReturn("jwt-token-here");
+        when(jwtUtils.generateJwtCookie(any(UserDetailsImpl.class))).thenReturn(jwtCookie);
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername("alice");
@@ -77,9 +83,9 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
+                .andExpect(header().exists("Set-Cookie"))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.username").value("alice"))
-                .andExpect(jsonPath("$.jwtToken").value("jwt-token-here"))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
     }
 

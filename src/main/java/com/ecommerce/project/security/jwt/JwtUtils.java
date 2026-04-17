@@ -2,6 +2,7 @@ package com.ecommerce.project.security.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,16 @@ public class JwtUtils {
         return jwtValidator.validateJwtToken(authToken);
     }
 
-    public String generateTokenFromUsername(UserDetails userDetails) {
-        return jwtGenerator.generateTokenFromUsername(userDetails);
+    public String generateTokenFromUsername(String username) {
+        return jwtGenerator.generateTokenFromUsername(username);
     }
+
+    public String getJwtFromCookie(HttpServletRequest request) {
+        return jwtParser.getJwtFromCookie(request);
+    }
+
+    public ResponseCookie generateJwtCookie(UserDetails userDetails) {
+        return jwtGenerator.generateJwtCookie(userDetails);
+    }
+
 }

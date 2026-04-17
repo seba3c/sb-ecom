@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -65,12 +66,33 @@ class JwtUtilsTest {
 
     @Test
     void generateTokenFromUsername_delegatesToJwtGenerator() {
-        UserDetails userDetails = new User("bob", "pass", Collections.emptyList());
-        when(jwtGenerator.generateTokenFromUsername(userDetails)).thenReturn("generated-token");
+        when(jwtGenerator.generateTokenFromUsername("bob")).thenReturn("generated-token");
 
-        String result = jwtUtils.generateTokenFromUsername(userDetails);
+        String result = jwtUtils.generateTokenFromUsername("bob");
 
         assertEquals("generated-token", result);
-        verify(jwtGenerator).generateTokenFromUsername(userDetails);
+        verify(jwtGenerator).generateTokenFromUsername("bob");
+    }
+
+    @Test
+    void getJwtFromCookie_delegatesToJwtParser() {
+        when(jwtParser.getJwtFromCookie(request)).thenReturn("cookie-token");
+
+        String result = jwtUtils.getJwtFromCookie(request);
+
+        assertEquals("cookie-token", result);
+        verify(jwtParser).getJwtFromCookie(request);
+    }
+
+    @Test
+    void generateJwtCookie_delegatesToJwtGenerator() {
+        UserDetails userDetails = new User("bob", "pass", Collections.emptyList());
+        ResponseCookie cookie = ResponseCookie.from("ecommerce-app", "jwt-value").build();
+        when(jwtGenerator.generateJwtCookie(userDetails)).thenReturn(cookie);
+
+        ResponseCookie result = jwtUtils.generateJwtCookie(userDetails);
+
+        assertEquals(cookie, result);
+        verify(jwtGenerator).generateJwtCookie(userDetails);
     }
 }
