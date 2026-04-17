@@ -42,4 +42,8 @@ public class JwtUtils {
         return jwtGenerator.generateJwtCookie(userDetails);
     }
 
+    public ResponseCookie generateJwtCleanCookie() {
+        return jwtGenerator.generateJwtCleanCookie();
+    }
+
 }

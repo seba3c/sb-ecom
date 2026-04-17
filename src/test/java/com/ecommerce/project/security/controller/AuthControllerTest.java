@@ -264,7 +264,33 @@ class AuthControllerTest {
     void currentUserDetails_withoutAuthentication_returnsMessage() throws Exception {
         mockMvc.perform(get("/api/auth/user"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("No user details found"));
+                .andExpect(jsonPath("$.message").value("No user details found"));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void signout_withAuthenticatedUser_returns200AndMessage() throws Exception {
+        ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null)
+                .path("/api").build();
+
+        when(jwtUtils.generateJwtCleanCookie()).thenReturn(cleanCookie);
+
+        mockMvc.perform(post("/api/auth/signout"))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Set-Cookie"))
+                .andExpect(jsonPath("$.message").value("User signed out successfully!"));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void signout_returnsCleanCookie() throws Exception {
+        ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null)
+                .path("/api").build();
+
+        when(jwtUtils.generateJwtCleanCookie()).thenReturn(cleanCookie);
+
+        mockMvc.perform(post("/api/auth/signout"))
+                .andExpect(header().string("Set-Cookie", cleanCookie.toString()));
     }
 
 }

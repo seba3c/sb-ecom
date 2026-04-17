@@ -66,4 +66,19 @@ class JwtGeneratorTest {
         assertEquals(COOKIE_EXPIRATION_SEC, cookie.getMaxAge().getSeconds());
         assertFalse(cookie.getValue().isBlank());
     }
+
+    @Test
+    void generateJwtCleanCookie_returnsNullValueCookie() {
+        ResponseCookie cookie = jwtGenerator.generateJwtCleanCookie();
+
+        assertEquals(COOKIE_NAME, cookie.getName());
+        assertEquals("/api", cookie.getPath());
+    }
+
+    @Test
+    void generateJwtCleanCookie_hasCorrectPath() {
+        ResponseCookie cookie = jwtGenerator.generateJwtCleanCookie();
+
+        assertEquals("/api", cookie.getPath());
+    }
 }

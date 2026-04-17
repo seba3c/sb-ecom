@@ -146,7 +146,13 @@ public class AuthController {
             UserInfoResponse response = getUserInfoResponse(userDetails);
             return ResponseEntity.ok(response);
         }
-        return ResponseEntity.ok("No user details found");
+        return ResponseEntity.ok(new MessageResponse("No user details found"));
+    }
+
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOut() {
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCleanCookie();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(new MessageResponse("User signed out successfully!"));
     }
 
 }

@@ -95,4 +95,15 @@ class JwtUtilsTest {
         assertEquals(cookie, result);
         verify(jwtGenerator).generateJwtCookie(userDetails);
     }
+
+    @Test
+    void generateJwtCleanCookie_delegatesToJwtGenerator() {
+        ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null).path("/api").build();
+        when(jwtGenerator.generateJwtCleanCookie()).thenReturn(cleanCookie);
+
+        ResponseCookie result = jwtUtils.generateJwtCleanCookie();
+
+        assertEquals(cleanCookie, result);
+        verify(jwtGenerator).generateJwtCleanCookie();
+    }
 }

@@ -42,6 +42,12 @@ public class JwtGenerator {
                 .build();
     }
 
+    public ResponseCookie generateJwtCleanCookie() {
+        return ResponseCookie.from(jwtCookie, null)
+                .path("/api")
+                .build();
+    }
+
     private Key key() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
