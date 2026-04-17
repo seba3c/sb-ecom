@@ -79,7 +79,6 @@ public class WebSecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()  // temporal until DB is replaced
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/admin/**").permitAll()   // temporal for development
                         .anyRequest().authenticated()
         );
         //

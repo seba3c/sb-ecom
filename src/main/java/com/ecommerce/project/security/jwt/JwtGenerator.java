@@ -38,13 +38,14 @@ public class JwtGenerator {
         return ResponseCookie.from(jwtCookie, jwt)
                 .path("/api")
                 .maxAge(jwtCookieExpiration)
-                .httpOnly(false)
+                .httpOnly(true)
                 .build();
     }
 
     public ResponseCookie generateJwtCleanCookie() {
-        return ResponseCookie.from(jwtCookie, null)
+        return ResponseCookie.from(jwtCookie, "")
                 .path("/api")
+                .maxAge(0)
                 .build();
     }
 
