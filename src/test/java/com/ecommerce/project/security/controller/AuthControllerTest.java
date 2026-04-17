@@ -19,18 +19,56 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@WithSecurityContext(factory = WithUserDetailsImplSecurityContextFactory.class)
+@interface WithUserDetailsImpl {
+    String username() default "alice";
+
+    long id() default 1L;
+
+    String[] roles() default {"ROLE_USER"};
+}
+
+class WithUserDetailsImplSecurityContextFactory implements WithSecurityContextFactory<WithUserDetailsImpl> {
+    @Override
+    public org.springframework.security.core.context.SecurityContext createSecurityContext(WithUserDetailsImpl annotation) {
+        List<SimpleGrantedAuthority> authorities = java.util.Arrays.stream(annotation.roles())
+                .map(SimpleGrantedAuthority::new)
+                .collect(java.util.stream.Collectors.toList());
+        UserDetailsImpl principal = new UserDetailsImpl(
+                annotation.id(),
+                annotation.username(),
+                annotation.username() + "@test.com",
+                "encoded",
+                authorities);
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+        org.springframework.security.core.context.SecurityContext context =
+                org.springframework.security.core.context.SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(token);
+        return context;
+    }
+}
 
 @WebMvcTest(AuthController.class)
 class AuthControllerTest {
@@ -195,6 +233,38 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User registered successfully!"));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void currentUsername_withAuthenticatedUser_returnsUsername() throws Exception {
+        mockMvc.perform(get("/api/auth/username"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("alice"));
+    }
+
+    @Test
+    void currentUsername_withoutAuthentication_returnsEmptyString() throws Exception {
+        mockMvc.perform(get("/api/auth/username"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @WithUserDetailsImpl(username = "alice", id = 1L, roles = {"ROLE_USER"})
+    void currentUserDetails_withAuthenticatedUser_returnsUserInfo() throws Exception {
+        mockMvc.perform(get("/api/auth/user"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.username").value("alice"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
+    }
+
+    @Test
+    void currentUserDetails_withoutAuthentication_returnsMessage() throws Exception {
+        mockMvc.perform(get("/api/auth/user"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("No user details found"));
     }
 
 }

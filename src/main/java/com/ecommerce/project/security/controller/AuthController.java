@@ -129,7 +129,8 @@ public class AuthController {
     }
 
     @GetMapping("/username")
-    public String currentUsername(Authentication authentication) {
+    public String currentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             return authentication.getName();
         }
@@ -137,11 +138,15 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<?> currentUserDetails(Authentication authentication) {
-        UserDetailsImpl userDetails = Objects.requireNonNull(
-                (UserDetailsImpl) authentication.getPrincipal());
-        UserInfoResponse response = getUserInfoResponse(userDetails);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> currentUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            UserDetailsImpl userDetails = Objects.requireNonNull(
+                    (UserDetailsImpl) authentication.getPrincipal());
+            UserInfoResponse response = getUserInfoResponse(userDetails);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.ok("No user details found");
     }
 
 }
