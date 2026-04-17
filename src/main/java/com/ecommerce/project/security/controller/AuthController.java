@@ -24,10 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,15 +66,19 @@ public class AuthController {
         UserDetailsImpl userDetails = Objects.requireNonNull(
                 (UserDetailsImpl) authentication.getPrincipal());
 
+        UserInfoResponse response = getUserInfoResponse(userDetails);
+
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
+    }
+
+    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        UserInfoResponse response = new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles);
-
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
+        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles);
     }
 
     @PostMapping("/signup")
@@ -126,4 +127,21 @@ public class AuthController {
         }
         return roles;
     }
+
+    @GetMapping("/username")
+    public String currentUsername(Authentication authentication) {
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        return "";
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> currentUserDetails(Authentication authentication) {
+        UserDetailsImpl userDetails = Objects.requireNonNull(
+                (UserDetailsImpl) authentication.getPrincipal());
+        UserInfoResponse response = getUserInfoResponse(userDetails);
+        return ResponseEntity.ok(response);
+    }
+
 }
