@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "products")
 @Data
@@ -22,11 +24,11 @@ public class Product {
     @NotBlank(message = "Product description must not be blank")
     private String description;
 
-    private int quantity = 0;
+    private Integer quantity = 0;
 
-    private double price;
+    private BigDecimal price;
 
-    private double discount;
+    private BigDecimal discount;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
