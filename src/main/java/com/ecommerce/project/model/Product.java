@@ -1,9 +1,10 @@
 package com.ecommerce.project.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "products")
@@ -22,11 +23,19 @@ public class Product {
     @NotBlank(message = "Product description must not be blank")
     private String description;
 
-    private int quantity = 0;
+    @NotNull
+    @Min(0)
+    private Integer quantity = 0;
 
-    private double price;
+    @NotNull
+    @DecimalMin("0.0")
+    @Column(precision = 12, scale = 2)
+    private BigDecimal price;
 
-    private double discount;
+    @NotNull
+    @DecimalMin("0.0")
+    @Column(precision = 12, scale = 2)
+    private BigDecimal discount;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

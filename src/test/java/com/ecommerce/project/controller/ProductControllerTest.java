@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +45,7 @@ class ProductControllerTest {
     private ObjectMapper objectMapper;
 
     private ProductDTO sampleProduct() {
-        return new ProductDTO(1L, "Laptop Pro", "High performance laptop", 10, 999.99, 0.1,
+        return new ProductDTO(1L, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1),
                 new CategoryDTO(1L, "Electronics"));
     }
 
@@ -59,7 +60,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/admin/categories/1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ProductDTO(null, "Laptop Pro", "High performance laptop", 10, 999.99, 0.1, null))))
+                                new ProductDTO(null, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1), null))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Laptop Pro"));
@@ -73,7 +74,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/admin/categories/99/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ProductDTO(null, "Laptop Pro", "desc", 0, 0.0, 0.0, null))))
+                                new ProductDTO(null, "Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO, null))))
                 .andExpect(status().isNotFound());
     }
 
@@ -85,7 +86,7 @@ class ProductControllerTest {
         mockMvc.perform(post("/api/admin/categories/1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ProductDTO(null, "Laptop Pro", "desc", 0, 0.0, 0.0, null))))
+                                new ProductDTO(null, "Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO, null))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Product with the name Laptop Pro already exists"));
     }
@@ -97,7 +98,7 @@ class ProductControllerTest {
         mockMvc.perform(put("/api/admin/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ProductDTO(null, "Laptop Pro", "desc", 10, 999.99, 0.1, null))))
+                                new ProductDTO(null, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1), null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Laptop Pro"));
@@ -111,7 +112,7 @@ class ProductControllerTest {
         mockMvc.perform(put("/api/admin/products/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new ProductDTO(null, "Laptop Pro", "desc", 10, 999.99, 0.1, null))))
+                                new ProductDTO(null, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1), null))))
                 .andExpect(status().isNotFound());
     }
 

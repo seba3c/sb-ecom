@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,17 +59,17 @@ class ProductServiceImplTest {
         product.setName("Laptop Pro");
         product.setDescription("High performance laptop");
         product.setQuantity(10);
-        product.setPrice(999.99);
-        product.setDiscount(0.1);
+        product.setPrice(BigDecimal.valueOf(999.99));
+        product.setDiscount(BigDecimal.valueOf(0.1));
         product.setCategory(category);
 
-        productDTO = new ProductDTO(1L, "Laptop Pro", "High performance laptop", 10, 999.99, 0.1,
+        productDTO = new ProductDTO(1L, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1),
                 new CategoryDTO(1L, "Electronics"));
     }
 
     @Test
     void createProduct_success() {
-        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro", "High performance laptop", 10, 999.99, 0.1, null);
+        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1), null);
         Product mappedProduct = new Product();
         mappedProduct.setName("Laptop Pro");
 
@@ -95,7 +96,7 @@ class ProductServiceImplTest {
 
     @Test
     void createProduct_duplicateName_throwsAPIException() {
-        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro", "desc", 0, 0, 0, null);
+        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO, null);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.findByName("Laptop Pro")).thenReturn(product);
@@ -109,7 +110,7 @@ class ProductServiceImplTest {
 
     @Test
     void updateProduct_success() {
-        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro X", "Updated desc", 5, 1099.99, 0.05, null);
+        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05), null);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(product)).thenReturn(product);
@@ -122,8 +123,8 @@ class ProductServiceImplTest {
         assertEquals("Laptop Pro X", product.getName());
         assertEquals("Updated desc", product.getDescription());
         assertEquals(5, product.getQuantity());
-        assertEquals(1099.99, product.getPrice());
-        assertEquals(0.05, product.getDiscount());
+        assertEquals(BigDecimal.valueOf(1099.99), product.getPrice());
+        assertEquals(BigDecimal.valueOf(0.05), product.getDiscount());
     }
 
     @Test
