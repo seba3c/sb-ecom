@@ -104,7 +104,7 @@ class CartServiceImplTest {
     @Test
     void addProductToCart_success_createsItemAndReturnsCart() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.empty());
         when(cartRepository.save(cart)).thenReturn(cart);
@@ -127,7 +127,7 @@ class CartServiceImplTest {
         savedCart.setTotalPrice(BigDecimal.ZERO);
 
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.empty());
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(cartRepository.save(any(Cart.class))).thenReturn(savedCart);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(savedCart, product)).thenReturn(Optional.empty());
@@ -141,7 +141,7 @@ class CartServiceImplTest {
     @Test
     void addProductToCart_productNotFound_throwsResourceNotFoundException() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> cartService.addProductToCart(99L, 1));
@@ -151,7 +151,7 @@ class CartServiceImplTest {
     @Test
     void addProductToCart_insufficientStock_throwsAPIException() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         assertThrows(APIException.class, () -> cartService.addProductToCart(1L, 100));
@@ -161,7 +161,7 @@ class CartServiceImplTest {
     @Test
     void addProductToCart_productAlreadyInCart_throwsAPIException() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
 
@@ -175,7 +175,7 @@ class CartServiceImplTest {
     void updateProductQuantity_success_updatesQuantity() {
         cart.getCartItems().add(cartItem);
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
@@ -192,7 +192,7 @@ class CartServiceImplTest {
     @Test
     void updateProductQuantity_cartNotFound_throwsAPIException() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.empty());
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.empty());
 
         assertThrows(APIException.class, () -> cartService.updateProductQuantity(1L, 3));
     }
@@ -200,7 +200,7 @@ class CartServiceImplTest {
     @Test
     void updateProductQuantity_itemNotInCart_throwsAPIException() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.empty());
 
@@ -213,7 +213,7 @@ class CartServiceImplTest {
     void removeProductFromCart_success_removesItem() {
         cart.getCartItems().add(cartItem);
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
@@ -228,7 +228,7 @@ class CartServiceImplTest {
     @Test
     void removeProductFromCart_itemNotInCart_throwsAPIException() {
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.empty());
 
@@ -241,7 +241,7 @@ class CartServiceImplTest {
     void getCart_existingCart_returnsCartDTO() {
         cart.getCartItems().add(cartItem);
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
         when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
 
@@ -261,7 +261,7 @@ class CartServiceImplTest {
         newCart.setTotalPrice(BigDecimal.ZERO);
 
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.empty());
+        when(cartRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(cartRepository.save(any(Cart.class))).thenReturn(newCart);
         when(modelMapper.map(newCart, CartDTO.class)).thenReturn(new CartDTO());
 

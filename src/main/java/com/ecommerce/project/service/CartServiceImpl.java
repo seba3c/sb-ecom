@@ -47,13 +47,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO addProductToCart(Long productId, Integer quantity) {
-        User user = authUtils.loggedInUser();
-        Cart cart = cartRepository.findByUserEmail(user.getEmail())
-                .orElseGet(() -> {
-                    Cart newCart = new Cart();
-                    newCart.setUser(user);
-                    return cartRepository.save(newCart);
-                });
+
+        Cart cart = fetchOrCreateCart();
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
@@ -80,9 +75,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO updateProductQuantity(Long productId, Integer quantity) {
-        User user = authUtils.loggedInUser();
-        Cart cart = cartRepository.findByUserEmail(user.getEmail())
-                .orElseThrow(() -> new APIException("Cart not found"));
+
+        Cart cart = fetchCart();
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
@@ -101,9 +95,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO removeProductFromCart(Long productId) {
-        User user = authUtils.loggedInUser();
-        Cart cart = cartRepository.findByUserEmail(user.getEmail())
-                .orElseThrow(() -> new APIException("Cart not found"));
+
+        Cart cart = fetchCart();
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
@@ -118,13 +111,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO getCart() {
-        User user = authUtils.loggedInUser();
-        Cart cart = cartRepository.findByUserEmail(user.getEmail())
-                .orElseGet(() -> {
-                    Cart newCart = new Cart();
-                    newCart.setUser(user);
-                    return cartRepository.save(newCart);
-                });
+        Cart cart = fetchOrCreateCart();
         return toCartDTO(cart);
     }
 
@@ -141,8 +128,8 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartResponse toCartResponse(Page<Cart> page) {
-        List<CartDTO> dtos = page.getContent().stream().map(this::toCartDTO).toList();
-        return new CartResponse(dtos, page.getNumber(), page.getSize(),
+        List<CartDTO> cartDTOs = page.getContent().stream().map(this::toCartDTO).toList();
+        return new CartResponse(cartDTOs, page.getNumber(), page.getSize(),
                 page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 
@@ -161,4 +148,21 @@ public class CartServiceImpl implements CartService {
                 .toList());
         return cartDTO;
     }
+
+    private Cart fetchOrCreateCart() {
+        User user = authUtils.loggedInUser();
+        return cartRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    return cartRepository.save(newCart);
+                });
+    }
+
+    private Cart fetchCart() {
+        User user = authUtils.loggedInUser();
+        return cartRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new APIException("Cart not found"));
+    }
+
 }

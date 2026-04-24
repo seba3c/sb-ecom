@@ -46,34 +46,6 @@ class AuthUtilsTest {
     }
 
     @Test
-    void loggedInEmail_authenticatedUser_returnsEmail() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-
-        assertEquals("test@example.com", authUtils.loggedInEmail());
-    }
-
-    @Test
-    void loggedInEmail_userNotFound_throwsUsernameNotFoundException() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
-
-        assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInEmail());
-    }
-
-    @Test
-    void loggedInUserId_authenticatedUser_returnsId() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
-
-        assertEquals(1L, authUtils.loggedInUserId());
-    }
-
-    @Test
-    void loggedInUserId_userNotFound_throwsUsernameNotFoundException() {
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
-
-        assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInUserId());
-    }
-
-    @Test
     void loggedInUser_authenticatedUser_returnsUser() {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
