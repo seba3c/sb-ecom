@@ -1,6 +1,8 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CartDTO;
+import com.ecommerce.project.dto.CartItemDTO;
+import com.ecommerce.project.dto.CartResponse;
 import com.ecommerce.project.dto.ProductDTO;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
@@ -20,6 +22,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +32,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +60,8 @@ class CartServiceImplTest {
     private Product product;
     private Cart cart;
     private CartItem cartItem;
+    private CartDTO cartDTO;
+    private CartItemDTO cartItemDTO;
     private ProductDTO productDTO;
 
     @BeforeEach
@@ -83,6 +91,12 @@ class CartServiceImplTest {
         cartItem.setDiscount(product.getDiscount());
 
         productDTO = new ProductDTO(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
+
+        cartItemDTO = new CartItemDTO(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, productDTO);
+
+        cartDTO = new CartDTO();
+        cartDTO.setId(1L);
+        cartDTO.setTotalPrice(BigDecimal.ZERO);
     }
 
     // --- addProductToCart ---
@@ -94,7 +108,8 @@ class CartServiceImplTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.empty());
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
+        when(modelMapper.map(any(CartItem.class), eq(CartItemDTO.class))).thenReturn(cartItemDTO);
 
         CartDTO result = cartService.addProductToCart(1L, 2);
 
@@ -116,7 +131,7 @@ class CartServiceImplTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(savedCart);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(savedCart, product)).thenReturn(Optional.empty());
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(savedCart, CartDTO.class)).thenReturn(cartDTO);
 
         CartDTO result = cartService.addProductToCart(1L, 1);
 
@@ -164,7 +179,8 @@ class CartServiceImplTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
+        when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
 
         CartDTO result = cartService.updateProductQuantity(1L, 5);
 
@@ -201,6 +217,7 @@ class CartServiceImplTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
+        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
 
         cartService.removeProductFromCart(1L);
 
@@ -225,7 +242,8 @@ class CartServiceImplTest {
         cart.getCartItems().add(cartItem);
         when(authUtils.loggedInUser()).thenReturn(user);
         when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
+        when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
 
         CartDTO result = cartService.getCart();
 
@@ -245,6 +263,7 @@ class CartServiceImplTest {
         when(authUtils.loggedInUser()).thenReturn(user);
         when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.empty());
         when(cartRepository.save(any(Cart.class))).thenReturn(newCart);
+        when(modelMapper.map(newCart, CartDTO.class)).thenReturn(new CartDTO());
 
         CartDTO result = cartService.getCart();
 
@@ -257,20 +276,20 @@ class CartServiceImplTest {
     @Test
     void getAllCarts_returnsAllCarts() {
         cart.getCartItems().add(cartItem);
-        when(cartRepository.findAll()).thenReturn(List.of(cart));
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(cartRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(cart)));
+        when(modelMapper.map(cart, CartDTO.class)).thenReturn(new CartDTO());
 
-        List<CartDTO> results = cartService.getAllCarts();
+        CartResponse response = cartService.getAllCarts(0, 50, "id", "asc");
 
-        assertEquals(1, results.size());
+        assertEquals(1, response.getContent().size());
     }
 
     @Test
     void getAllCarts_noCarts_returnsEmptyList() {
-        when(cartRepository.findAll()).thenReturn(List.of());
+        when(cartRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
 
-        List<CartDTO> results = cartService.getAllCarts();
+        CartResponse response = cartService.getAllCarts(0, 50, "id", "asc");
 
-        assertTrue(results.isEmpty());
+        assertTrue(response.getContent().isEmpty());
     }
 }

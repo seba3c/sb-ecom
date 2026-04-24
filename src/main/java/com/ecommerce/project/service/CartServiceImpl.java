@@ -2,7 +2,7 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CartDTO;
 import com.ecommerce.project.dto.CartItemDTO;
-import com.ecommerce.project.dto.ProductDTO;
+import com.ecommerce.project.dto.CartResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Cart;
@@ -17,6 +17,11 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -70,7 +75,7 @@ public class CartServiceImpl implements CartService {
         cart.getCartItems().add(item);
 
         recalculateTotalPrice(cart);
-        return toDTO(cartRepository.save(cart));
+        return toCartDTO(cartRepository.save(cart));
     }
 
     @Override
@@ -91,7 +96,7 @@ public class CartServiceImpl implements CartService {
         item.setQuantity(quantity);
 
         recalculateTotalPrice(cart);
-        return toDTO(cartRepository.save(cart));
+        return toCartDTO(cartRepository.save(cart));
     }
 
     @Override
@@ -108,7 +113,7 @@ public class CartServiceImpl implements CartService {
 
         cart.getCartItems().remove(item);
         recalculateTotalPrice(cart);
-        return toDTO(cartRepository.save(cart));
+        return toCartDTO(cartRepository.save(cart));
     }
 
     @Override
@@ -120,14 +125,25 @@ public class CartServiceImpl implements CartService {
                     newCart.setUser(user);
                     return cartRepository.save(newCart);
                 });
-        return toDTO(cart);
+        return toCartDTO(cart);
     }
 
     @Override
-    public List<CartDTO> getAllCarts() {
-        return cartRepository.findAll().stream()
-                .map(this::toDTO)
-                .toList();
+    public CartResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        return toCartResponse(cartRepository.findAll(toPageable(pageNumber, pageSize, sortBy, sortOrder)));
+    }
+
+    private Pageable toPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sort = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        return PageRequest.of(pageNumber, pageSize, sort);
+    }
+
+    private CartResponse toCartResponse(Page<Cart> page) {
+        List<CartDTO> dtos = page.getContent().stream().map(this::toCartDTO).toList();
+        return new CartResponse(dtos, page.getNumber(), page.getSize(),
+                page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 
     private void recalculateTotalPrice(Cart cart) {
@@ -138,23 +154,11 @@ public class CartServiceImpl implements CartService {
         cart.setTotalPrice(total);
     }
 
-    private CartDTO toDTO(Cart cart) {
-        List<CartItemDTO> itemDTOs = cart.getCartItems().stream()
-                .map(item -> {
-                    CartItemDTO dto = new CartItemDTO();
-                    dto.setId(item.getId());
-                    dto.setQuantity(item.getQuantity());
-                    dto.setPrice(item.getPrice());
-                    dto.setDiscount(item.getDiscount());
-                    dto.setProduct(modelMapper.map(item.getProduct(), ProductDTO.class));
-                    return dto;
-                })
-                .toList();
-
-        CartDTO cartDTO = new CartDTO();
-        cartDTO.setId(cart.getId());
-        cartDTO.setTotalPrice(cart.getTotalPrice());
-        cartDTO.setCartItems(itemDTOs);
+    private CartDTO toCartDTO(Cart cart) {
+        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+        cartDTO.setCartItems(cart.getCartItems().stream()
+                .map(item -> modelMapper.map(item, CartItemDTO.class))
+                .toList());
         return cartDTO;
     }
 }

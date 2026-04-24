@@ -2,6 +2,7 @@ package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.CartDTO;
 import com.ecommerce.project.dto.CartItemDTO;
+import com.ecommerce.project.dto.CartResponse;
 import com.ecommerce.project.dto.ProductDTO;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -133,10 +135,11 @@ class CartControllerTest {
 
     @Test
     void getAllCarts_success_returns200() throws Exception {
-        when(cartService.getAllCarts()).thenReturn(List.of(sampleCart()));
+        CartResponse response = new CartResponse(List.of(sampleCart()), 0, 50, 1L, 1, true);
+        when(cartService.getAllCarts(any(), any(), any(), any())).thenReturn(response);
 
         mockMvc.perform(get("/api/admin/carts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
+                .andExpect(jsonPath("$.content[0].id").value(1));
     }
 }

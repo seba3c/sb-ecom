@@ -1,8 +1,7 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CartDTO;
-
-import java.util.List;
+import com.ecommerce.project.dto.CartResponse;
 
 public interface CartService {
 
@@ -14,5 +13,5 @@ public interface CartService {
 
     CartDTO getCart();
 
-    List<CartDTO> getAllCarts();
+    CartResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 }
