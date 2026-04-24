@@ -105,6 +105,7 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new APIException("Product not found in cart"));
 
         cart.getCartItems().remove(item);
+        item.setCart(null);
         recalculateTotalPrice(cart);
         return toCartDTO(cartRepository.save(cart));
     }
