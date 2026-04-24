@@ -174,21 +174,6 @@ class CartServiceImplTest {
     }
 
     @Test
-    void updateProductQuantity_quantityZero_removesItem() {
-        cart.getCartItems().add(cartItem);
-        when(authUtils.loggedInUser()).thenReturn(user);
-        when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.of(cart));
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
-        when(cartRepository.save(cart)).thenReturn(cart);
-
-        cartService.updateProductQuantity(1L, 0);
-
-        assertTrue(cart.getCartItems().isEmpty());
-        verify(cartRepository).save(cart);
-    }
-
-    @Test
     void updateProductQuantity_cartNotFound_throwsAPIException() {
         when(authUtils.loggedInUser()).thenReturn(user);
         when(cartRepository.findByUserEmail("test@example.com")).thenReturn(Optional.empty());

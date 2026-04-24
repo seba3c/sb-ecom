@@ -2,13 +2,16 @@ package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.CartDTO;
 import com.ecommerce.project.service.CartService;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api")
 public class CartController {
@@ -19,14 +22,14 @@ public class CartController {
     @PostMapping("/my_cart/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDTO> addProductToCart(
             @PathVariable Long productId,
-            @PathVariable Integer quantity) {
+            @PathVariable @Min(1) Integer quantity) {
         return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addProductToCart(productId, quantity));
     }
 
     @PutMapping("/my_cart/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDTO> updateProductQuantity(
             @PathVariable Long productId,
-            @PathVariable Integer quantity) {
+            @PathVariable @Min(1) Integer quantity) {
         return ResponseEntity.ok(cartService.updateProductQuantity(productId, quantity));
     }
 

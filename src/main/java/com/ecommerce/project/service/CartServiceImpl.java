@@ -13,6 +13,7 @@ import com.ecommerce.project.repository.CartItemRepository;
 import com.ecommerce.project.repository.CartRepository;
 import com.ecommerce.project.repository.ProductRepository;
 import com.ecommerce.project.util.AuthUtils;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Transactional
 public class CartServiceImpl implements CartService {
 
     @Autowired
@@ -83,14 +85,10 @@ public class CartServiceImpl implements CartService {
         CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
                 .orElseThrow(() -> new APIException("Product not found in cart"));
 
-        if (quantity == 0) {
-            cart.getCartItems().remove(item);
-        } else {
-            if (product.getQuantity() < quantity) {
-                throw new APIException("Insufficient stock for product: " + product.getName());
-            }
-            item.setQuantity(quantity);
+        if (product.getQuantity() < quantity) {
+            throw new APIException("Insufficient stock for product: " + product.getName());
         }
+        item.setQuantity(quantity);
 
         recalculateTotalPrice(cart);
         return toDTO(cartRepository.save(cart));

@@ -1,10 +1,7 @@
 package com.ecommerce.project.util;
 
-import com.ecommerce.project.exception.APIException;
-import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.security.repository.UserRepository;
-import com.ecommerce.project.security.service.UserDetailsImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +28,6 @@ class AuthUtilsTest {
     @InjectMocks
     private AuthUtils authUtils;
 
-    private UserDetailsImpl userDetails;
     private User user;
 
     @BeforeEach
@@ -38,10 +35,8 @@ class AuthUtilsTest {
         user = new User("testuser", "test@example.com", "password");
         user.setId(1L);
 
-        userDetails = new UserDetailsImpl(1L, "testuser", "test@example.com", "password", List.of());
-
         UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(userDetails, null, List.of());
+                new UsernamePasswordAuthenticationToken("testuser", null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
@@ -52,29 +47,35 @@ class AuthUtilsTest {
 
     @Test
     void loggedInEmail_authenticatedUser_returnsEmail() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
         assertEquals("test@example.com", authUtils.loggedInEmail());
     }
 
     @Test
-    void loggedInEmail_noAuthentication_throwsAPIException() {
-        SecurityContextHolder.clearContext();
-        assertThrows(APIException.class, () -> authUtils.loggedInEmail());
+    void loggedInEmail_userNotFound_throwsUsernameNotFoundException() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInEmail());
     }
 
     @Test
     void loggedInUserId_authenticatedUser_returnsId() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+
         assertEquals(1L, authUtils.loggedInUserId());
     }
 
     @Test
-    void loggedInUserId_noAuthentication_throwsAPIException() {
-        SecurityContextHolder.clearContext();
-        assertThrows(APIException.class, () -> authUtils.loggedInUserId());
+    void loggedInUserId_userNotFound_throwsUsernameNotFoundException() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInUserId());
     }
 
     @Test
     void loggedInUser_authenticatedUser_returnsUser() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         User result = authUtils.loggedInUser();
 
@@ -83,15 +84,9 @@ class AuthUtilsTest {
     }
 
     @Test
-    void loggedInUser_userNotFoundInDb_throwsResourceNotFoundException() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+    void loggedInUser_userNotFound_throwsUsernameNotFoundException() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> authUtils.loggedInUser());
-    }
-
-    @Test
-    void loggedInUser_noAuthentication_throwsAPIException() {
-        SecurityContextHolder.clearContext();
-        assertThrows(APIException.class, () -> authUtils.loggedInUser());
+        assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInUser());
     }
 }

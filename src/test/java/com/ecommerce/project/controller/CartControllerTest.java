@@ -59,6 +59,12 @@ class CartControllerTest {
     }
 
     @Test
+    void addProductToCart_invalidQuantity_returns400() throws Exception {
+        mockMvc.perform(post("/api/my_cart/1/quantity/0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void addProductToCart_productNotFound_returns404() throws Exception {
         when(cartService.addProductToCart(99L, 1))
                 .thenThrow(new ResourceNotFoundException("Product", "id", 99L));
@@ -85,6 +91,12 @@ class CartControllerTest {
         mockMvc.perform(put("/api/my_cart/1/quantity/5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void updateProductQuantity_invalidQuantity_returns400() throws Exception {
+        mockMvc.perform(put("/api/my_cart/1/quantity/0"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
