@@ -19,6 +19,8 @@ public class AppConfig {
         public static final String SORT_CATEGORIES_DIR = "asc";
         public static final String SORT_PRODUCTS_BY = "id";
         public static final String SORT_PRODUCTS_DIR = "asc";
+        public static final String SORT_CARTS_BY = "id";
+        public static final String SORT_CARTS_DIR = "asc";
     }
 
 }

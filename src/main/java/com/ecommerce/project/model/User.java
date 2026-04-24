@@ -58,6 +58,10 @@ public class User {
     @ToString.Exclude
     private List<Address> addresses = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @ToString.Exclude
+    private Cart cart;
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;

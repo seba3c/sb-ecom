@@ -1,0 +1,145 @@
+package com.ecommerce.project.controller;
+
+import com.ecommerce.project.dto.CartDTO;
+import com.ecommerce.project.dto.CartItemDTO;
+import com.ecommerce.project.dto.CartResponse;
+import com.ecommerce.project.dto.ProductDTO;
+import com.ecommerce.project.exception.APIException;
+import com.ecommerce.project.exception.ResourceNotFoundException;
+import com.ecommerce.project.security.jwt.JwtUtils;
+import com.ecommerce.project.security.service.UserDetailsServiceImpl;
+import com.ecommerce.project.service.CartService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(CartController.class)
+class CartControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private CartService cartService;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
+    @MockitoBean
+    private UserDetailsServiceImpl userDetailsService;
+
+    private CartDTO sampleCart() {
+        ProductDTO product = new ProductDTO(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
+        CartItemDTO item = new CartItemDTO(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, product);
+        CartDTO cart = new CartDTO();
+        cart.setId(1L);
+        cart.setTotalPrice(BigDecimal.valueOf(1999.98));
+        cart.setCartItems(List.of(item));
+        return cart;
+    }
+
+    @Test
+    void addProductToCart_success_returns201() throws Exception {
+        when(cartService.addProductToCart(1L, 2)).thenReturn(sampleCart());
+
+        mockMvc.perform(post("/api/my_cart/1/quantity/2"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.cartItems[0].quantity").value(2));
+    }
+
+    @Test
+    void addProductToCart_invalidQuantity_returns400() throws Exception {
+        mockMvc.perform(post("/api/my_cart/1/quantity/0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void addProductToCart_productNotFound_returns404() throws Exception {
+        when(cartService.addProductToCart(99L, 1))
+                .thenThrow(new ResourceNotFoundException("Product", "id", 99L));
+
+        mockMvc.perform(post("/api/my_cart/99/quantity/1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void addProductToCart_alreadyInCart_returns400() throws Exception {
+        when(cartService.addProductToCart(1L, 2))
+                .thenThrow(new APIException("Product already in cart. Use PUT to update quantity."));
+
+        mockMvc.perform(post("/api/my_cart/1/quantity/2"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateProductQuantity_success_returns200() throws Exception {
+        CartDTO updated = sampleCart();
+        updated.getCartItems().get(0);
+        when(cartService.updateProductQuantity(1L, 5)).thenReturn(updated);
+
+        mockMvc.perform(put("/api/my_cart/1/quantity/5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void updateProductQuantity_invalidQuantity_returns400() throws Exception {
+        mockMvc.perform(put("/api/my_cart/1/quantity/0"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateProductQuantity_itemNotFound_returns400() throws Exception {
+        when(cartService.updateProductQuantity(99L, 3))
+                .thenThrow(new APIException("Product not found in cart"));
+
+        mockMvc.perform(put("/api/my_cart/99/quantity/3"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void removeProductFromCart_success_returns200() throws Exception {
+        CartDTO emptyCart = new CartDTO();
+        emptyCart.setId(1L);
+        emptyCart.setTotalPrice(BigDecimal.ZERO);
+        emptyCart.setCartItems(new ArrayList<>());
+        when(cartService.removeProductFromCart(1L)).thenReturn(emptyCart);
+
+        mockMvc.perform(delete("/api/my_cart/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void getCart_success_returns200() throws Exception {
+        when(cartService.getCart()).thenReturn(sampleCart());
+
+        mockMvc.perform(get("/api/my_cart"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.totalPrice").value(1999.98));
+    }
+
+    @Test
+    void getAllCarts_success_returns200() throws Exception {
+        CartResponse response = new CartResponse(List.of(sampleCart()), 0, 50, 1L, 1, true);
+        when(cartService.getAllCarts(any(), any(), any(), any())).thenReturn(response);
+
+        mockMvc.perform(get("/api/admin/carts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(1));
+    }
+}

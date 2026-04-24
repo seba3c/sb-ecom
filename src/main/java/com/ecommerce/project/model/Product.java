@@ -3,8 +3,11 @@ package com.ecommerce.project.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -45,4 +48,7 @@ public class Product {
     @JoinColumn(name = "seller_id")
     private User seller;
 
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ToString.Exclude
+    private List<CartItem> cartItems = new ArrayList<>();
 }
