@@ -1,0 +1,178 @@
+package com.ecommerce.project.controller;
+
+import com.ecommerce.project.dto.AddressDTO;
+import com.ecommerce.project.dto.AddressResponse;
+import com.ecommerce.project.exception.ResourceNotFoundException;
+import com.ecommerce.project.security.jwt.JwtUtils;
+import com.ecommerce.project.security.service.UserDetailsServiceImpl;
+import com.ecommerce.project.service.AddressService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(AddressController.class)
+class AddressControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private AddressService addressService;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
+    @MockitoBean
+    private UserDetailsServiceImpl userDetailsService;
+
+    @Test
+    void getAllAddresses_returns200WithAddresses() throws Exception {
+        AddressDTO dto1 = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDTO dto2 = new AddressDTO(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
+        AddressResponse response = new AddressResponse(List.of(dto1, dto2));
+        when(addressService.getAllAddresses()).thenReturn(response);
+
+        mockMvc.perform(get("/api/addresses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].streetLine1").value("123 Main St"))
+                .andExpect(jsonPath("$.content[1].streetLine1").value("456 Oak Ave"));
+    }
+
+    @Test
+    void getAllAddresses_empty_returns200() throws Exception {
+        when(addressService.getAllAddresses()).thenReturn(new AddressResponse(List.of()));
+
+        mockMvc.perform(get("/api/addresses"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty());
+    }
+
+    @Test
+    void getAddressById_returns200() throws Exception {
+        AddressDTO dto = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        when(addressService.getAddressById(1L)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/addresses/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.streetLine1").value("123 Main St"))
+                .andExpect(jsonPath("$.city").value("New York"))
+                .andExpect(jsonPath("$.state").value("NY"))
+                .andExpect(jsonPath("$.country").value("USA"))
+                .andExpect(jsonPath("$.zipCode").value("10001"));
+    }
+
+    @Test
+    void getAddressById_notFound_returns404() throws Exception {
+        when(addressService.getAddressById(99L))
+                .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
+
+        mockMvc.perform(get("/api/addresses/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Address with id: 99 not found"));
+    }
+
+    @Test
+    void createAddress_returns201() throws Exception {
+        AddressDTO resultDTO = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        when(addressService.createAddress(any(AddressDTO.class))).thenReturn(resultDTO);
+
+        mockMvc.perform(post("/api/addresses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "streetLine1": "123 Main St",
+                                    "city": "New York",
+                                    "state": "NY",
+                                    "country": "USA",
+                                    "zipCode": "10001"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.streetLine1").value("123 Main St"))
+                .andExpect(jsonPath("$.city").value("New York"))
+                .andExpect(jsonPath("$.state").value("NY"))
+                .andExpect(jsonPath("$.country").value("USA"))
+                .andExpect(jsonPath("$.zipCode").value("10001"));
+    }
+
+    @Test
+    void updateAddress_returns200() throws Exception {
+        AddressDTO resultDTO = new AddressDTO(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
+        when(addressService.updateAddress(eq(1L), any(AddressDTO.class))).thenReturn(resultDTO);
+
+        mockMvc.perform(put("/api/addresses/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "streetLine1": "Updated St",
+                                    "city": "Boston",
+                                    "state": "MA",
+                                    "country": "USA",
+                                    "zipCode": "02101"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.streetLine1").value("Updated St"))
+                .andExpect(jsonPath("$.city").value("Boston"))
+                .andExpect(jsonPath("$.state").value("MA"))
+                .andExpect(jsonPath("$.country").value("USA"))
+                .andExpect(jsonPath("$.zipCode").value("02101"));
+    }
+
+    @Test
+    void updateAddress_notFound_returns404() throws Exception {
+        when(addressService.updateAddress(eq(99L), any(AddressDTO.class)))
+                .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
+
+        mockMvc.perform(put("/api/addresses/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "streetLine1": "Updated St",
+                                    "city": "Boston",
+                                    "state": "MA",
+                                    "country": "USA",
+                                    "zipCode": "02101"
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Address with id: 99 not found"));
+    }
+
+    @Test
+    void deleteAddress_returns204() throws Exception {
+        doNothing().when(addressService).deleteAddress(1L);
+
+        mockMvc.perform(delete("/api/addresses/1"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteAddress_notFound_returns404() throws Exception {
+        doThrow(new ResourceNotFoundException("Address", "id", 99L)).when(addressService).deleteAddress(99L);
+
+        mockMvc.perform(delete("/api/addresses/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Address with id: 99 not found"));
+    }
+}
