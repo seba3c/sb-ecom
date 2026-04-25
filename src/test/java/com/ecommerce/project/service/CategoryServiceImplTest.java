@@ -1,8 +1,8 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -145,24 +144,18 @@ class CategoryServiceImplTest {
         Category existingCategory = new Category();
         existingCategory.setId(1L);
         existingCategory.setName("Old Name");
-        Category mappedCategory = new Category();
-        mappedCategory.setName("Updated Name");
-        Category savedCategory = new Category();
-        savedCategory.setId(1L);
-        savedCategory.setName("Updated Name");
         CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Updated Name");
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(existingCategory));
-        when(modelMapper.map(request, Category.class)).thenReturn(mappedCategory);
-        when(categoryRepository.save(mappedCategory)).thenReturn(savedCategory);
-        when(modelMapper.map(savedCategory, CategoryDetailResponse.class)).thenReturn(resultDTO);
+        when(categoryRepository.save(any(Category.class))).thenReturn(existingCategory);
+        when(modelMapper.map(existingCategory, CategoryDetailResponse.class)).thenReturn(resultDTO);
 
         CategoryDetailResponse result = categoryService.updateCategory(1L, request);
 
         assertEquals(1L, result.getId());
         assertEquals("Updated Name", result.getName());
-        assertEquals(1L, mappedCategory.getId());
-        verify(categoryRepository).save(mappedCategory);
+        assertEquals("Updated Name", existingCategory.getName());
+        verify(categoryRepository).save(existingCategory);
     }
 
     @Test

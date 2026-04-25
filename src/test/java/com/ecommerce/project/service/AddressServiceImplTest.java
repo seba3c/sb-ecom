@@ -1,8 +1,8 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
@@ -21,7 +21,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AddressServiceImplTest {
@@ -155,33 +156,24 @@ class AddressServiceImplTest {
         Address existingAddress = new Address();
         existingAddress.setId(1L);
         existingAddress.setStreetLine1("123 Main St");
-        Address mappedAddress = new Address();
-        mappedAddress.setId(1L);
-        mappedAddress.setStreetLine1("Updated St");
-        mappedAddress.setCity("Boston");
-        mappedAddress.setState("MA");
-        mappedAddress.setCountry("USA");
-        mappedAddress.setZipCode("02101");
-        Address savedAddress = new Address();
-        savedAddress.setId(1L);
-        savedAddress.setStreetLine1("Updated St");
-        savedAddress.setCity("Boston");
-        savedAddress.setState("MA");
-        savedAddress.setCountry("USA");
-        savedAddress.setZipCode("02101");
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
 
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(existingAddress));
-        when(modelMapper.map(request, Address.class)).thenReturn(mappedAddress);
-        when(addressRepository.save(mappedAddress)).thenReturn(savedAddress);
-        when(modelMapper.map(savedAddress, AddressDetailResponse.class)).thenReturn(resultDTO);
+        when(addressRepository.save(any(Address.class))).thenReturn(existingAddress);
+        when(modelMapper.map(existingAddress, AddressDetailResponse.class)).thenReturn(resultDTO);
 
         AddressDetailResponse result = addressService.updateAddress(1L, request);
 
         assertEquals(1L, result.getId());
         assertEquals("Updated St", result.getStreetLine1());
-        verify(addressRepository).save(mappedAddress);
+        assertEquals("Updated St", existingAddress.getStreetLine1());
+        assertNull(existingAddress.getStreetLine2());
+        assertEquals("Boston", existingAddress.getCity());
+        assertEquals("MA", existingAddress.getState());
+        assertEquals("USA", existingAddress.getCountry());
+        assertEquals("02101", existingAddress.getZipCode());
+        verify(addressRepository).save(existingAddress);
     }
 
     @Test

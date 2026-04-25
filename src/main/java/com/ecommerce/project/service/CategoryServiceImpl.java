@@ -71,10 +71,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDetailResponse updateCategory(Long id, CategoryUpdateRequest request) {
-        categoryRepository.findById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
-        Category category = modelMapper.map(request, Category.class);
-        category.setId(id);
+
+        category.setName(request.getName());
+        
         return modelMapper.map(categoryRepository.save(category), CategoryDetailResponse.class);
     }
 }

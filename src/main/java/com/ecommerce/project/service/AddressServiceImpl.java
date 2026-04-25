@@ -59,13 +59,17 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressDetailResponse updateAddress(Long id, AddressUpdateRequest request) {
         User user = authUtils.loggedInUser();
-        addressRepository.findByIdAndUser(id, user)
+        Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
-        Address address = modelMapper.map(request, Address.class);
-        address.setId(id);
-        address.setUser(user);
-        Address savedAddress = addressRepository.save(address);
-        return modelMapper.map(savedAddress, AddressDetailResponse.class);
+
+        address.setStreetLine1(request.getStreetLine1());
+        address.setStreetLine2(request.getStreetLine2());
+        address.setCity(request.getCity());
+        address.setState(request.getState());
+        address.setCountry(request.getCountry());
+        address.setZipCode(request.getZipCode());
+
+        return modelMapper.map(addressRepository.save(address), AddressDetailResponse.class);
     }
 
     @Override
