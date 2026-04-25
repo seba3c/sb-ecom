@@ -1,15 +1,15 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.dto.ProductListResponse;
-import com.ecommerce.project.dto.UpdateProductRequest;
+import com.ecommerce.project.dto.ProductUpdateRequest;
 
 public interface ProductService {
 
-    ProductDetailResponse createProduct(Long categoryId, CreateProductRequest request);
+    ProductDetailResponse createProduct(Long categoryId, ProductCreateRequest request);
 
-    ProductDetailResponse updateProduct(Long productId, UpdateProductRequest request);
+    ProductDetailResponse updateProduct(Long productId, ProductUpdateRequest request);
 
     ProductDetailResponse deleteProduct(Long productId);
 

@@ -2,8 +2,8 @@ package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.CreateAddressRequest;
-import com.ecommerce.project.dto.UpdateAddressRequest;
+import com.ecommerce.project.dto.AddressCreateRequest;
+import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +29,12 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressDetailResponse> createAddress(@Valid @RequestBody CreateAddressRequest request) {
+    public ResponseEntity<AddressDetailResponse> createAddress(@Valid @RequestBody AddressCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AddressDetailResponse> updateAddress(@PathVariable Long id, @Valid @RequestBody UpdateAddressRequest request) {
+    public ResponseEntity<AddressDetailResponse> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressUpdateRequest request) {
         return ResponseEntity.ok(addressService.updateAddress(id, request));
     }
 

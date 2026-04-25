@@ -2,13 +2,14 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.CreateAddressRequest;
-import com.ecommerce.project.dto.UpdateAddressRequest;
+import com.ecommerce.project.dto.AddressCreateRequest;
+import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.AddressRepository;
 import com.ecommerce.project.util.AuthUtils;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Transactional
 public class AddressServiceImpl implements AddressService {
 
     @Autowired
@@ -46,7 +48,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDetailResponse createAddress(CreateAddressRequest request) {
+    public AddressDetailResponse createAddress(AddressCreateRequest request) {
         User user = authUtils.loggedInUser();
         Address address = modelMapper.map(request, Address.class);
         address.setUser(user);
@@ -55,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDetailResponse updateAddress(Long id, UpdateAddressRequest request) {
+    public AddressDetailResponse updateAddress(Long id, AddressUpdateRequest request) {
         User user = authUtils.loggedInUser();
         addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));

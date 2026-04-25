@@ -2,8 +2,8 @@ package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.CreateAddressRequest;
-import com.ecommerce.project.dto.UpdateAddressRequest;
+import com.ecommerce.project.dto.AddressCreateRequest;
+import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
@@ -94,7 +94,7 @@ class AddressControllerTest {
     @Test
     void createAddress_returns201() throws Exception {
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        when(addressService.createAddress(any(CreateAddressRequest.class))).thenReturn(resultDTO);
+        when(addressService.createAddress(any(AddressCreateRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(post("/api/addresses")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ class AddressControllerTest {
     @Test
     void updateAddress_returns200() throws Exception {
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
-        when(addressService.updateAddress(eq(1L), any(UpdateAddressRequest.class))).thenReturn(resultDTO);
+        when(addressService.updateAddress(eq(1L), any(AddressUpdateRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(put("/api/addresses/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class AddressControllerTest {
 
     @Test
     void updateAddress_notFound_returns404() throws Exception {
-        when(addressService.updateAddress(eq(99L), any(UpdateAddressRequest.class)))
+        when(addressService.updateAddress(eq(99L), any(AddressUpdateRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
 
         mockMvc.perform(put("/api/addresses/99")

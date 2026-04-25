@@ -1,7 +1,7 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CartDetailResponse;
-import com.ecommerce.project.dto.CartItemDTO;
+import com.ecommerce.project.dto.CartItemDetail;
 import com.ecommerce.project.dto.CartListResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
@@ -145,7 +145,7 @@ public class CartServiceImpl implements CartService {
     private CartDetailResponse toCartDetailResponse(Cart cart) {
         CartDetailResponse response = modelMapper.map(cart, CartDetailResponse.class);
         response.setCartItems(cart.getCartItems().stream()
-                .map(item -> modelMapper.map(item, CartItemDTO.class))
+                .map(item -> modelMapper.map(item, CartItemDetail.class))
                 .toList());
         return response;
     }

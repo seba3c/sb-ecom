@@ -1,10 +1,10 @@
 package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.CategoryDetailResponse;
-import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.dto.ProductListResponse;
-import com.ecommerce.project.dto.UpdateProductRequest;
+import com.ecommerce.project.dto.ProductUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
@@ -57,12 +57,12 @@ class ProductControllerTest {
 
     @Test
     void createProduct_returns201() throws Exception {
-        when(productService.createProduct(eq(1L), any(CreateProductRequest.class))).thenReturn(sampleProduct());
+        when(productService.createProduct(eq(1L), any(ProductCreateRequest.class))).thenReturn(sampleProduct());
 
         mockMvc.perform(post("/api/admin/categories/1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreateProductRequest("Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1)))))
+                                new ProductCreateRequest("Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1)))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Laptop Pro"));
@@ -70,37 +70,37 @@ class ProductControllerTest {
 
     @Test
     void createProduct_categoryNotFound_returns404() throws Exception {
-        when(productService.createProduct(eq(99L), any(CreateProductRequest.class)))
+        when(productService.createProduct(eq(99L), any(ProductCreateRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Category", "id", 99L));
 
         mockMvc.perform(post("/api/admin/categories/99/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreateProductRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO))))
+                                new ProductCreateRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO))))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void createProduct_duplicateName_returns400() throws Exception {
-        when(productService.createProduct(eq(1L), any(CreateProductRequest.class)))
+        when(productService.createProduct(eq(1L), any(ProductCreateRequest.class)))
                 .thenThrow(new APIException("Product with the name Laptop Pro already exists"));
 
         mockMvc.perform(post("/api/admin/categories/1/products")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreateProductRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO))))
+                                new ProductCreateRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Product with the name Laptop Pro already exists"));
     }
 
     @Test
     void updateProduct_returns200() throws Exception {
-        when(productService.updateProduct(eq(1L), any(UpdateProductRequest.class))).thenReturn(sampleProduct());
+        when(productService.updateProduct(eq(1L), any(ProductUpdateRequest.class))).thenReturn(sampleProduct());
 
         mockMvc.perform(put("/api/admin/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new UpdateProductRequest("Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1)))))
+                                new ProductUpdateRequest("Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Laptop Pro"));
@@ -108,13 +108,13 @@ class ProductControllerTest {
 
     @Test
     void updateProduct_notFound_returns404() throws Exception {
-        when(productService.updateProduct(eq(99L), any(UpdateProductRequest.class)))
+        when(productService.updateProduct(eq(99L), any(ProductUpdateRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Product", "id", 99L));
 
         mockMvc.perform(put("/api/admin/products/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new UpdateProductRequest("Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1)))))
+                                new ProductUpdateRequest("Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1)))))
                 .andExpect(status().isNotFound());
     }
 

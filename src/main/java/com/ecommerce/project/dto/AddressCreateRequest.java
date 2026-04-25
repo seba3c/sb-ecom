@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAddressRequest {
+public class AddressCreateRequest {
 
     @NotBlank
     @Size(min = 1, message = "Street name must have at least 1 characters")

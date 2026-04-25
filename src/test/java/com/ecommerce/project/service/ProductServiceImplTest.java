@@ -1,10 +1,10 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CategoryDetailResponse;
-import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.dto.ProductListResponse;
-import com.ecommerce.project.dto.UpdateProductRequest;
+import com.ecommerce.project.dto.ProductUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -71,7 +71,7 @@ class ProductServiceImplTest {
 
     @Test
     void createProduct_success() {
-        CreateProductRequest request = new CreateProductRequest("Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1));
+        ProductCreateRequest request = new ProductCreateRequest("Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1));
         Product mappedProduct = new Product();
         mappedProduct.setName("Laptop Pro");
 
@@ -93,12 +93,12 @@ class ProductServiceImplTest {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> productService.createProduct(99L, new CreateProductRequest()));
+                () -> productService.createProduct(99L, new ProductCreateRequest()));
     }
 
     @Test
     void createProduct_duplicateName_throwsAPIException() {
-        CreateProductRequest request = new CreateProductRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO);
+        ProductCreateRequest request = new ProductCreateRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.findByName("Laptop Pro")).thenReturn(product);
@@ -112,7 +112,7 @@ class ProductServiceImplTest {
 
     @Test
     void updateProduct_success() {
-        UpdateProductRequest request = new UpdateProductRequest("Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05));
+        ProductUpdateRequest request = new ProductUpdateRequest("Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05));
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(product)).thenReturn(product);
@@ -134,7 +134,7 @@ class ProductServiceImplTest {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> productService.updateProduct(99L, new UpdateProductRequest()));
+                () -> productService.updateProduct(99L, new ProductUpdateRequest()));
 
         verify(productRepository, never()).save(any());
     }

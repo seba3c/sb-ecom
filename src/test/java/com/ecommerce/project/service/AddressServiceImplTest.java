@@ -2,8 +2,8 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.CreateAddressRequest;
-import com.ecommerce.project.dto.UpdateAddressRequest;
+import com.ecommerce.project.dto.AddressCreateRequest;
+import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
@@ -119,7 +119,7 @@ class AddressServiceImplTest {
     void createAddress_success() {
         User user = new User();
         user.setId(1L);
-        CreateAddressRequest request = new CreateAddressRequest("123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressCreateRequest request = new AddressCreateRequest("123 Main St", null, "New York", "NY", "USA", "10001");
         Address mappedAddress = new Address();
         mappedAddress.setStreetLine1("123 Main St");
         mappedAddress.setCity("New York");
@@ -151,7 +151,7 @@ class AddressServiceImplTest {
     void updateAddress_success() {
         User user = new User();
         user.setId(1L);
-        UpdateAddressRequest request = new UpdateAddressRequest("Updated St", null, "Boston", "MA", "USA", "02101");
+        AddressUpdateRequest request = new AddressUpdateRequest("Updated St", null, "Boston", "MA", "USA", "02101");
         Address existingAddress = new Address();
         existingAddress.setId(1L);
         existingAddress.setStreetLine1("123 Main St");
@@ -188,7 +188,7 @@ class AddressServiceImplTest {
     void updateAddress_notFound_throwsResourceNotFoundException() {
         User user = new User();
         user.setId(1L);
-        UpdateAddressRequest request = new UpdateAddressRequest("Updated St", null, "Boston", "MA", "USA", "02101");
+        AddressUpdateRequest request = new AddressUpdateRequest("Updated St", null, "Boston", "MA", "USA", "02101");
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 

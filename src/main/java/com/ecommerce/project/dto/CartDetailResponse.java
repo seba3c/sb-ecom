@@ -14,5 +14,5 @@ import java.util.List;
 public class CartDetailResponse {
     private Long id;
     private BigDecimal totalPrice;
-    private List<CartItemDTO> cartItems = new ArrayList<>();
+    private List<CartItemDetail> cartItems = new ArrayList<>();
 }

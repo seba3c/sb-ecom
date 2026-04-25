@@ -1,7 +1,7 @@
 package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.CartDetailResponse;
-import com.ecommerce.project.dto.CartItemDTO;
+import com.ecommerce.project.dto.CartItemDetail;
 import com.ecommerce.project.dto.CartListResponse;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.exception.APIException;
@@ -42,7 +42,7 @@ class CartControllerTest {
 
     private CartDetailResponse sampleCart() {
         ProductDetailResponse product = new ProductDetailResponse(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
-        CartItemDTO item = new CartItemDTO(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, product);
+        CartItemDetail item = new CartItemDetail(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, product);
         CartDetailResponse cart = new CartDetailResponse();
         cart.setId(1L);
         cart.setTotalPrice(BigDecimal.valueOf(1999.98));

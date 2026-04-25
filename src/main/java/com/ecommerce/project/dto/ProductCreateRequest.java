@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateProductRequest {
+public class ProductCreateRequest {
 
     @NotBlank(message = "Product name must not be blank")
     @Size(min = 5, message = "Product name must have at least 5 characters")

@@ -2,8 +2,8 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CreateCategoryRequest;
-import com.ecommerce.project.dto.UpdateCategoryRequest;
+import com.ecommerce.project.dto.CategoryCreateRequest;
+import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -73,7 +73,7 @@ class CategoryServiceImplTest {
 
     @Test
     void createCategory_success() {
-        CreateCategoryRequest request = new CreateCategoryRequest("Electronics");
+        CategoryCreateRequest request = new CategoryCreateRequest("Electronics");
         Category mappedCategory = new Category();
         mappedCategory.setName("Electronics");
         Category savedCategory = new Category();
@@ -95,7 +95,7 @@ class CategoryServiceImplTest {
 
     @Test
     void createCategory_duplicateName_throwsAPIException() {
-        CreateCategoryRequest request = new CreateCategoryRequest("Electronics");
+        CategoryCreateRequest request = new CategoryCreateRequest("Electronics");
         Category mappedCategory = new Category();
         mappedCategory.setName("Electronics");
         Category existingCategory = new Category();
@@ -141,7 +141,7 @@ class CategoryServiceImplTest {
 
     @Test
     void updateCategory_success() {
-        UpdateCategoryRequest request = new UpdateCategoryRequest("Updated Name");
+        CategoryUpdateRequest request = new CategoryUpdateRequest("Updated Name");
         Category existingCategory = new Category();
         existingCategory.setId(1L);
         existingCategory.setName("Old Name");
@@ -170,7 +170,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> categoryService.updateCategory(99L, new UpdateCategoryRequest("Name")));
+                () -> categoryService.updateCategory(99L, new CategoryUpdateRequest("Name")));
 
         verify(categoryRepository, never()).save(any());
     }

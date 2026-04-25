@@ -3,8 +3,8 @@ package com.ecommerce.project.controller;
 import com.ecommerce.project.config.AppConfig;
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CreateCategoryRequest;
-import com.ecommerce.project.dto.UpdateCategoryRequest;
+import com.ecommerce.project.dto.CategoryCreateRequest;
+import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class CategoryController {
     }
 
     @PostMapping("/admin/categories")
-    public ResponseEntity<CategoryDetailResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
+    public ResponseEntity<CategoryDetailResponse> createCategory(@Valid @RequestBody CategoryCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(request));
     }
 
@@ -41,7 +41,7 @@ public class CategoryController {
     }
 
     @PutMapping("/admin/categories/{id}")
-    public ResponseEntity<CategoryDetailResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody UpdateCategoryRequest request) {
+    public ResponseEntity<CategoryDetailResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryUpdateRequest request) {
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateCategoryRequest {
+public class CategoryCreateRequest {
 
     @NotBlank(message = "Category name must not be blank")
     @Size(min = 5, message = "Category name must have at least 5 characters")

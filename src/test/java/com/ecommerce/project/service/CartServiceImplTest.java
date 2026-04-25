@@ -1,7 +1,7 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CartDetailResponse;
-import com.ecommerce.project.dto.CartItemDTO;
+import com.ecommerce.project.dto.CartItemDetail;
 import com.ecommerce.project.dto.CartListResponse;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.exception.APIException;
@@ -61,7 +61,7 @@ class CartServiceImplTest {
     private Cart cart;
     private CartItem cartItem;
     private CartDetailResponse cartDTO;
-    private CartItemDTO cartItemDTO;
+    private CartItemDetail cartItemDTO;
     private ProductDetailResponse productDTO;
 
     @BeforeEach
@@ -92,7 +92,7 @@ class CartServiceImplTest {
 
         productDTO = new ProductDetailResponse(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
 
-        cartItemDTO = new CartItemDTO(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, productDTO);
+        cartItemDTO = new CartItemDetail(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, productDTO);
 
         cartDTO = new CartDetailResponse();
         cartDTO.setId(1L);
@@ -109,7 +109,7 @@ class CartServiceImplTest {
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.empty());
         when(cartRepository.save(cart)).thenReturn(cart);
         when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
-        when(modelMapper.map(any(CartItem.class), eq(CartItemDTO.class))).thenReturn(cartItemDTO);
+        when(modelMapper.map(any(CartItem.class), eq(CartItemDetail.class))).thenReturn(cartItemDTO);
 
         CartDetailResponse result = cartService.addProductToCart(1L, 2);
 
@@ -180,7 +180,7 @@ class CartServiceImplTest {
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
         when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
-        when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
+        when(modelMapper.map(cartItem, CartItemDetail.class)).thenReturn(cartItemDTO);
 
         CartDetailResponse result = cartService.updateProductQuantity(1L, 5);
 
@@ -243,7 +243,7 @@ class CartServiceImplTest {
         when(authUtils.loggedInUser()).thenReturn(user);
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
-        when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
+        when(modelMapper.map(cartItem, CartItemDetail.class)).thenReturn(cartItemDTO);
 
         CartDetailResponse result = cartService.getCart();
 

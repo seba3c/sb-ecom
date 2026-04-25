@@ -1,9 +1,9 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.dto.ProductListResponse;
-import com.ecommerce.project.dto.UpdateProductRequest;
+import com.ecommerce.project.dto.ProductUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
     private ModelMapper modelMapper;
 
     @Override
-    public ProductDetailResponse createProduct(Long categoryId, CreateProductRequest request) {
+    public ProductDetailResponse createProduct(Long categoryId, ProductCreateRequest request) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
 
@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDetailResponse updateProduct(Long productId, UpdateProductRequest request) {
+    public ProductDetailResponse updateProduct(Long productId, ProductUpdateRequest request) {
         Product existing = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 

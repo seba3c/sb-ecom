@@ -2,8 +2,8 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.CreateAddressRequest;
-import com.ecommerce.project.dto.UpdateAddressRequest;
+import com.ecommerce.project.dto.AddressCreateRequest;
+import com.ecommerce.project.dto.AddressUpdateRequest;
 
 public interface AddressService {
 
@@ -11,9 +11,9 @@ public interface AddressService {
 
     AddressDetailResponse getAddressById(Long id);
 
-    AddressDetailResponse createAddress(CreateAddressRequest request);
+    AddressDetailResponse createAddress(AddressCreateRequest request);
 
-    AddressDetailResponse updateAddress(Long id, UpdateAddressRequest request);
+    AddressDetailResponse updateAddress(Long id, AddressUpdateRequest request);
 
     void deleteAddress(Long id);
 }

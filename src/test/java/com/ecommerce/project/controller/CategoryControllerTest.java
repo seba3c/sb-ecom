@@ -2,8 +2,8 @@ package com.ecommerce.project.controller;
 
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CreateCategoryRequest;
-import com.ecommerce.project.dto.UpdateCategoryRequest;
+import com.ecommerce.project.dto.CategoryCreateRequest;
+import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
@@ -73,11 +73,11 @@ class CategoryControllerTest {
     @Test
     void createCategory_returns201() throws Exception {
         CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Electronics");
-        when(categoryService.createCategory(any(CreateCategoryRequest.class))).thenReturn(resultDTO);
+        when(categoryService.createCategory(any(CategoryCreateRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(post("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateCategoryRequest("Electronics"))))
+                        .content(objectMapper.writeValueAsString(new CategoryCreateRequest("Electronics"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Electronics"));
@@ -85,12 +85,12 @@ class CategoryControllerTest {
 
     @Test
     void createCategory_duplicate_returns400() throws Exception {
-        when(categoryService.createCategory(any(CreateCategoryRequest.class)))
+        when(categoryService.createCategory(any(CategoryCreateRequest.class)))
                 .thenThrow(new APIException("Category with the name Electronics already exists"));
 
         mockMvc.perform(post("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateCategoryRequest("Electronics"))))
+                        .content(objectMapper.writeValueAsString(new CategoryCreateRequest("Electronics"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Category with the name Electronics already exists"));
     }
@@ -119,11 +119,11 @@ class CategoryControllerTest {
     @Test
     void updateCategory_returns200() throws Exception {
         CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Updated");
-        when(categoryService.updateCategory(eq(1L), any(UpdateCategoryRequest.class))).thenReturn(resultDTO);
+        when(categoryService.updateCategory(eq(1L), any(CategoryUpdateRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(put("/api/admin/categories/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateCategoryRequest("Updated"))))
+                        .content(objectMapper.writeValueAsString(new CategoryUpdateRequest("Updated"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Updated"));
@@ -131,12 +131,12 @@ class CategoryControllerTest {
 
     @Test
     void updateCategory_notFound_returns404() throws Exception {
-        when(categoryService.updateCategory(eq(99L), any(UpdateCategoryRequest.class)))
+        when(categoryService.updateCategory(eq(99L), any(CategoryUpdateRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Category", "id", 99L));
 
         mockMvc.perform(put("/api/admin/categories/99")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new UpdateCategoryRequest("Updated"))))
+                        .content(objectMapper.writeValueAsString(new CategoryUpdateRequest("Updated"))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Category with id: 99 not found"));
     }

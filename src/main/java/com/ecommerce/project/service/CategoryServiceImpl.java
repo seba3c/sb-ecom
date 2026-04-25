@@ -2,8 +2,8 @@ package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CreateCategoryRequest;
-import com.ecommerce.project.dto.UpdateCategoryRequest;
+import com.ecommerce.project.dto.CategoryCreateRequest;
+import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDetailResponse createCategory(CreateCategoryRequest request) {
+    public CategoryDetailResponse createCategory(CategoryCreateRequest request) {
         Category category = modelMapper.map(request, Category.class);
         Category existing = categoryRepository.findByName(category.getName());
         if (existing != null) {
@@ -70,7 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDetailResponse updateCategory(Long id, UpdateCategoryRequest request) {
+    public CategoryDetailResponse updateCategory(Long id, CategoryUpdateRequest request) {
         categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         Category category = modelMapper.map(request, Category.class);

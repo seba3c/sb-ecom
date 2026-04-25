@@ -1,10 +1,10 @@
 package com.ecommerce.project.controller;
 
 import com.ecommerce.project.config.AppConfig;
-import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.dto.ProductListResponse;
-import com.ecommerce.project.dto.UpdateProductRequest;
+import com.ecommerce.project.dto.ProductUpdateRequest;
 import com.ecommerce.project.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +22,14 @@ public class ProductController {
     @PostMapping("/admin/categories/{categoryId}/products")
     public ResponseEntity<ProductDetailResponse> createProduct(
             @PathVariable Long categoryId,
-            @Valid @RequestBody CreateProductRequest request) {
+            @Valid @RequestBody ProductCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(categoryId, request));
     }
 
     @PutMapping("/admin/products/{productId}")
     public ResponseEntity<ProductDetailResponse> updateProduct(
             @PathVariable Long productId,
-            @Valid @RequestBody UpdateProductRequest request) {
+            @Valid @RequestBody ProductUpdateRequest request) {
         return ResponseEntity.ok(productService.updateProduct(productId, request));
     }
 
