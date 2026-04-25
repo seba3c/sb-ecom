@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.math.BigDecimal;
@@ -11,7 +12,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "cart_items")
 @Data
-public class CartItem {
+@EqualsAndHashCode(callSuper = false)
+public class CartItem extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
