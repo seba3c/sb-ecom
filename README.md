@@ -1,8 +1,41 @@
 # sb-ecom
-Java Spring Boot + AI Tools learning project
 
-I am using this Java Spring Boot based project to follow the course https://github.com/EmbarkXOfficial/spring-boot-course
+A Spring Boot REST API built as a learning project — both for Spring Boot itself and for AI-assisted development with tools like Claude Code, Gemini CLI, Codex CLI, and OpenCode.
 
-I am just following the general idea but doing some changes in the codebase such us different coding style and naming, using Kotlin instead of Maven, etc.
+## Goals
 
-And last but not least I am using it to learn and use Claude Code and well as other AI coding tools (Gemini CLI, Codex CLI and Open Code), the main idea is to try to write as less code as possible and use these AI code assistants to generate 100% of the codebase. I am also trying to introduce the concepts of skills, agents and MCP servers.
+- Follow the [EmbarkX Spring Boot course](https://github.com/EmbarkXOfficial/spring-boot-course) as a loose guide, adapting the code with different conventions and tooling choices (Gradle Kotlin DSL instead of Maven, etc.)
+- Use AI coding assistants to generate as much of the codebase as possible
+- Explore AI concepts: skills, agents, and MCP servers in a real project context
+
+## Stack
+
+- Java 21 / Spring Boot 4.0
+- Spring Data JPA (MySQL by default; H2 and PostgreSQL profiles available)
+- Spring Security with stateless JWT cookie-based authentication
+- Gradle with Kotlin DSL
+
+## Quick Start
+
+```bash
+# Start MySQL via Docker Compose, then:
+./gradlew bootRun          # runs on http://localhost:8080
+
+# Run with H2 in-memory database instead
+./gradlew bootRun -Dspring.profiles.active=h2
+
+# Run tests
+./gradlew test
+```
+
+## Seed Users
+
+| Username | Password     | Roles                              |
+|----------|--------------|------------------------------------|
+| user     | userpass     | ROLE_USER                          |
+| seller   | sellerpass   | ROLE_SELLER                        |
+| admin    | adminpass    | ROLE_USER, ROLE_SELLER, ROLE_ADMIN |
+
+## Documentation
+
+See [AGENTS.md](AGENTS.md) for architecture details, API endpoints, and contribution guidelines.
