@@ -1,8 +1,8 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.CartDTO;
-import com.ecommerce.project.dto.CartItemDTO;
-import com.ecommerce.project.dto.CartResponse;
+import com.ecommerce.project.dto.CartDetailResponse;
+import com.ecommerce.project.dto.CartItemDetail;
+import com.ecommerce.project.dto.CartListResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Cart;
@@ -46,7 +46,7 @@ public class CartServiceImpl implements CartService {
     private ModelMapper modelMapper;
 
     @Override
-    public CartDTO addProductToCart(Long productId, Integer quantity) {
+    public CartDetailResponse addProductToCart(Long productId, Integer quantity) {
 
         Cart cart = fetchOrCreateCart();
 
@@ -70,11 +70,11 @@ public class CartServiceImpl implements CartService {
         cart.getCartItems().add(item);
 
         recalculateTotalPrice(cart);
-        return toCartDTO(cartRepository.save(cart));
+        return toCartDetailResponse(cartRepository.save(cart));
     }
 
     @Override
-    public CartDTO updateProductQuantity(Long productId, Integer quantity) {
+    public CartDetailResponse updateProductQuantity(Long productId, Integer quantity) {
 
         Cart cart = fetchCart();
 
@@ -90,11 +90,11 @@ public class CartServiceImpl implements CartService {
         item.setQuantity(quantity);
 
         recalculateTotalPrice(cart);
-        return toCartDTO(cartRepository.save(cart));
+        return toCartDetailResponse(cartRepository.save(cart));
     }
 
     @Override
-    public CartDTO removeProductFromCart(Long productId) {
+    public CartDetailResponse removeProductFromCart(Long productId) {
 
         Cart cart = fetchCart();
 
@@ -107,18 +107,18 @@ public class CartServiceImpl implements CartService {
         cart.getCartItems().remove(item);
         item.setCart(null);
         recalculateTotalPrice(cart);
-        return toCartDTO(cartRepository.save(cart));
+        return toCartDetailResponse(cartRepository.save(cart));
     }
 
     @Override
-    public CartDTO getCart() {
+    public CartDetailResponse getCart() {
         Cart cart = fetchOrCreateCart();
-        return toCartDTO(cart);
+        return toCartDetailResponse(cart);
     }
 
     @Override
-    public CartResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        return toCartResponse(cartRepository.findAll(toPageable(pageNumber, pageSize, sortBy, sortOrder)));
+    public CartListResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        return toCartListResponse(cartRepository.findAll(toPageable(pageNumber, pageSize, sortBy, sortOrder)));
     }
 
     private Pageable toPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -128,9 +128,9 @@ public class CartServiceImpl implements CartService {
         return PageRequest.of(pageNumber, pageSize, sort);
     }
 
-    private CartResponse toCartResponse(Page<Cart> page) {
-        List<CartDTO> cartDTOs = page.getContent().stream().map(this::toCartDTO).toList();
-        return new CartResponse(cartDTOs, page.getNumber(), page.getSize(),
+    private CartListResponse toCartListResponse(Page<Cart> page) {
+        List<CartDetailResponse> carts = page.getContent().stream().map(this::toCartDetailResponse).toList();
+        return new CartListResponse(carts, page.getNumber(), page.getSize(),
                 page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 
@@ -142,12 +142,12 @@ public class CartServiceImpl implements CartService {
         cart.setTotalPrice(total);
     }
 
-    private CartDTO toCartDTO(Cart cart) {
-        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
-        cartDTO.setCartItems(cart.getCartItems().stream()
-                .map(item -> modelMapper.map(item, CartItemDTO.class))
+    private CartDetailResponse toCartDetailResponse(Cart cart) {
+        CartDetailResponse response = modelMapper.map(cart, CartDetailResponse.class);
+        response.setCartItems(cart.getCartItems().stream()
+                .map(item -> modelMapper.map(item, CartItemDetail.class))
                 .toList());
-        return cartDTO;
+        return response;
     }
 
     private Cart fetchOrCreateCart() {

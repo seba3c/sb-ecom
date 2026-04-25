@@ -1,7 +1,9 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.dto.AddressDTO;
-import com.ecommerce.project.dto.AddressResponse;
+import com.ecommerce.project.dto.AddressDetailResponse;
+import com.ecommerce.project.dto.AddressListResponse;
+import com.ecommerce.project.dto.AddressCreateRequest;
+import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,23 +19,23 @@ public class AddressController {
     private AddressService addressService;
 
     @GetMapping
-    public ResponseEntity<AddressResponse> getAllAddresses() {
+    public ResponseEntity<AddressListResponse> getAllAddresses() {
         return ResponseEntity.ok(addressService.getAllAddresses());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AddressDTO> getAddressById(@PathVariable Long id) {
+    public ResponseEntity<AddressDetailResponse> getAddressById(@PathVariable Long id) {
         return ResponseEntity.ok(addressService.getAddressById(id));
     }
 
     @PostMapping
-    public ResponseEntity<AddressDTO> createAddress(@Valid @RequestBody AddressDTO addressDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(addressDTO));
+    public ResponseEntity<AddressDetailResponse> createAddress(@Valid @RequestBody AddressCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AddressDTO> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressDTO addressDTO) {
-        return ResponseEntity.ok(addressService.updateAddress(id, addressDTO));
+    public ResponseEntity<AddressDetailResponse> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressUpdateRequest request) {
+        return ResponseEntity.ok(addressService.updateAddress(id, request));
     }
 
     @DeleteMapping("/{id}")

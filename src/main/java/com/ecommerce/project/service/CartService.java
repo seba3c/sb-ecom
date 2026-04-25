@@ -1,17 +1,17 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.CartDTO;
-import com.ecommerce.project.dto.CartResponse;
+import com.ecommerce.project.dto.CartDetailResponse;
+import com.ecommerce.project.dto.CartListResponse;
 
 public interface CartService {
 
-    CartDTO addProductToCart(Long productId, Integer quantity);
+    CartDetailResponse addProductToCart(Long productId, Integer quantity);
 
-    CartDTO updateProductQuantity(Long productId, Integer quantity);
+    CartDetailResponse updateProductQuantity(Long productId, Integer quantity);
 
-    CartDTO removeProductFromCart(Long productId);
+    CartDetailResponse removeProductFromCart(Long productId);
 
-    CartDTO getCart();
+    CartDetailResponse getCart();
 
-    CartResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    CartListResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 }

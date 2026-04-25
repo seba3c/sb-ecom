@@ -1,7 +1,9 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.ProductDTO;
-import com.ecommerce.project.dto.ProductResponse;
+import com.ecommerce.project.dto.ProductCreateRequest;
+import com.ecommerce.project.dto.ProductDetailResponse;
+import com.ecommerce.project.dto.ProductListResponse;
+import com.ecommerce.project.dto.ProductUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -31,67 +33,67 @@ public class ProductServiceImpl implements ProductService {
     private ModelMapper modelMapper;
 
     @Override
-    public ProductDTO createProduct(Long categoryId, ProductDTO productDTO) {
+    public ProductDetailResponse createProduct(Long categoryId, ProductCreateRequest request) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
 
-        if (productRepository.findByName(productDTO.getName()) != null) {
-            throw new APIException("Product with the name " + productDTO.getName() + " already exists");
+        if (productRepository.findByName(request.getName()) != null) {
+            throw new APIException("Product with the name " + request.getName() + " already exists");
         }
 
-        Product product = modelMapper.map(productDTO, Product.class);
+        Product product = modelMapper.map(request, Product.class);
         product.setCategory(category);
-        return modelMapper.map(productRepository.save(product), ProductDTO.class);
+        return modelMapper.map(productRepository.save(product), ProductDetailResponse.class);
     }
 
     @Override
-    public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
+    public ProductDetailResponse updateProduct(Long productId, ProductUpdateRequest request) {
         Product existing = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
-        existing.setName(productDTO.getName());
-        existing.setDescription(productDTO.getDescription());
-        existing.setQuantity(productDTO.getQuantity());
-        existing.setPrice(productDTO.getPrice());
-        existing.setDiscount(productDTO.getDiscount());
+        existing.setName(request.getName());
+        existing.setDescription(request.getDescription());
+        existing.setQuantity(request.getQuantity());
+        existing.setPrice(request.getPrice());
+        existing.setDiscount(request.getDiscount());
 
-        return modelMapper.map(productRepository.save(existing), ProductDTO.class);
+        return modelMapper.map(productRepository.save(existing), ProductDetailResponse.class);
     }
 
     @Override
-    public ProductDTO deleteProduct(Long productId) {
+    public ProductDetailResponse deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         productRepository.deleteById(productId);
-        return modelMapper.map(product, ProductDTO.class);
+        return modelMapper.map(product, ProductDetailResponse.class);
     }
 
     @Override
-    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        return toProductResponse(productRepository.findAll(toPageable(pageNumber, pageSize, sortBy, sortOrder)));
+    public ProductListResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        return toProductListResponse(productRepository.findAll(toPageable(pageNumber, pageSize, sortBy, sortOrder)));
     }
 
     @Override
-    public ProductDTO getProductById(Long productId) {
+    public ProductDetailResponse getProductById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
-        return modelMapper.map(product, ProductDTO.class);
+        return modelMapper.map(product, ProductDetailResponse.class);
     }
 
     @Override
-    public ProductResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public ProductListResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Page<Product> page = productRepository
                 .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
                         keyword, keyword, toPageable(pageNumber, pageSize, sortBy, sortOrder));
-        return toProductResponse(page);
+        return toProductListResponse(page);
     }
 
     @Override
-    public ProductResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public ProductListResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
         Page<Product> page = productRepository.findByCategory(category, toPageable(pageNumber, pageSize, sortBy, sortOrder));
-        return toProductResponse(page);
+        return toProductListResponse(page);
     }
 
     private Pageable toPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -101,11 +103,11 @@ public class ProductServiceImpl implements ProductService {
         return PageRequest.of(pageNumber, pageSize, sort);
     }
 
-    private ProductResponse toProductResponse(Page<Product> page) {
-        List<ProductDTO> dtos = page.getContent().stream()
-                .map(p -> modelMapper.map(p, ProductDTO.class))
+    private ProductListResponse toProductListResponse(Page<Product> page) {
+        List<ProductDetailResponse> dtos = page.getContent().stream()
+                .map(p -> modelMapper.map(p, ProductDetailResponse.class))
                 .toList();
-        return new ProductResponse(dtos, page.getNumber(), page.getSize(),
+        return new ProductListResponse(dtos, page.getNumber(), page.getSize(),
                 page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 }

@@ -1,9 +1,9 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.CartDTO;
-import com.ecommerce.project.dto.CartItemDTO;
-import com.ecommerce.project.dto.CartResponse;
-import com.ecommerce.project.dto.ProductDTO;
+import com.ecommerce.project.dto.CartDetailResponse;
+import com.ecommerce.project.dto.CartItemDetail;
+import com.ecommerce.project.dto.CartListResponse;
+import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Cart;
@@ -60,9 +60,9 @@ class CartServiceImplTest {
     private Product product;
     private Cart cart;
     private CartItem cartItem;
-    private CartDTO cartDTO;
-    private CartItemDTO cartItemDTO;
-    private ProductDTO productDTO;
+    private CartDetailResponse cartDTO;
+    private CartItemDetail cartItemDTO;
+    private ProductDetailResponse productDTO;
 
     @BeforeEach
     void setUp() {
@@ -90,11 +90,11 @@ class CartServiceImplTest {
         cartItem.setPrice(product.getPrice());
         cartItem.setDiscount(product.getDiscount());
 
-        productDTO = new ProductDTO(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
+        productDTO = new ProductDetailResponse(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
 
-        cartItemDTO = new CartItemDTO(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, productDTO);
+        cartItemDTO = new CartItemDetail(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, productDTO);
 
-        cartDTO = new CartDTO();
+        cartDTO = new CartDetailResponse();
         cartDTO.setId(1L);
         cartDTO.setTotalPrice(BigDecimal.ZERO);
     }
@@ -108,10 +108,10 @@ class CartServiceImplTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.empty());
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
-        when(modelMapper.map(any(CartItem.class), eq(CartItemDTO.class))).thenReturn(cartItemDTO);
+        when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
+        when(modelMapper.map(any(CartItem.class), eq(CartItemDetail.class))).thenReturn(cartItemDTO);
 
-        CartDTO result = cartService.addProductToCart(1L, 2);
+        CartDetailResponse result = cartService.addProductToCart(1L, 2);
 
         assertNotNull(result);
         assertEquals(1, cart.getCartItems().size());
@@ -131,9 +131,9 @@ class CartServiceImplTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(savedCart);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(savedCart, product)).thenReturn(Optional.empty());
-        when(modelMapper.map(savedCart, CartDTO.class)).thenReturn(cartDTO);
+        when(modelMapper.map(savedCart, CartDetailResponse.class)).thenReturn(cartDTO);
 
-        CartDTO result = cartService.addProductToCart(1L, 1);
+        CartDetailResponse result = cartService.addProductToCart(1L, 1);
 
         assertNotNull(result);
     }
@@ -179,10 +179,10 @@ class CartServiceImplTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
-        when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
+        when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
+        when(modelMapper.map(cartItem, CartItemDetail.class)).thenReturn(cartItemDTO);
 
-        CartDTO result = cartService.updateProductQuantity(1L, 5);
+        CartDetailResponse result = cartService.updateProductQuantity(1L, 5);
 
         assertNotNull(result);
         assertEquals(5, cartItem.getQuantity());
@@ -217,7 +217,7 @@ class CartServiceImplTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(cartItemRepository.findByCartAndProduct(cart, product)).thenReturn(Optional.of(cartItem));
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
+        when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
 
         cartService.removeProductFromCart(1L);
 
@@ -242,10 +242,10 @@ class CartServiceImplTest {
         cart.getCartItems().add(cartItem);
         when(authUtils.loggedInUser()).thenReturn(user);
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
-        when(modelMapper.map(cart, CartDTO.class)).thenReturn(cartDTO);
-        when(modelMapper.map(cartItem, CartItemDTO.class)).thenReturn(cartItemDTO);
+        when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(cartDTO);
+        when(modelMapper.map(cartItem, CartItemDetail.class)).thenReturn(cartItemDTO);
 
-        CartDTO result = cartService.getCart();
+        CartDetailResponse result = cartService.getCart();
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -263,9 +263,9 @@ class CartServiceImplTest {
         when(authUtils.loggedInUser()).thenReturn(user);
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.empty());
         when(cartRepository.save(any(Cart.class))).thenReturn(newCart);
-        when(modelMapper.map(newCart, CartDTO.class)).thenReturn(new CartDTO());
+        when(modelMapper.map(newCart, CartDetailResponse.class)).thenReturn(new CartDetailResponse());
 
-        CartDTO result = cartService.getCart();
+        CartDetailResponse result = cartService.getCart();
 
         assertNotNull(result);
         assertTrue(result.getCartItems().isEmpty());
@@ -277,9 +277,9 @@ class CartServiceImplTest {
     void getAllCarts_returnsAllCarts() {
         cart.getCartItems().add(cartItem);
         when(cartRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(cart)));
-        when(modelMapper.map(cart, CartDTO.class)).thenReturn(new CartDTO());
+        when(modelMapper.map(cart, CartDetailResponse.class)).thenReturn(new CartDetailResponse());
 
-        CartResponse response = cartService.getAllCarts(0, 50, "id", "asc");
+        CartListResponse response = cartService.getAllCarts(0, 50, "id", "asc");
 
         assertEquals(1, response.getContent().size());
     }
@@ -288,7 +288,7 @@ class CartServiceImplTest {
     void getAllCarts_noCarts_returnsEmptyList() {
         when(cartRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
 
-        CartResponse response = cartService.getAllCarts(0, 50, "id", "asc");
+        CartListResponse response = cartService.getAllCarts(0, 50, "id", "asc");
 
         assertTrue(response.getContent().isEmpty());
     }

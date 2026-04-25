@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressResponse {
-    private List<AddressDTO> content;
+public class AddressListResponse {
+    private List<AddressDetailResponse> content;
 }
