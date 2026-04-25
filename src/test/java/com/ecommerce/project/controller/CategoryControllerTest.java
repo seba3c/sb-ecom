@@ -1,7 +1,9 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.dto.CategoryDTO;
-import com.ecommerce.project.dto.CategoryResponse;
+import com.ecommerce.project.dto.CategoryDetailResponse;
+import com.ecommerce.project.dto.CategoryListResponse;
+import com.ecommerce.project.dto.CreateCategoryRequest;
+import com.ecommerce.project.dto.UpdateCategoryRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
@@ -44,9 +46,9 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_returns200WithCategories() throws Exception {
-        CategoryResponse response = new CategoryResponse(List.of(
-                new CategoryDTO(1L, "Electronics"),
-                new CategoryDTO(2L, "Clothing")
+        CategoryListResponse response = new CategoryListResponse(List.of(
+                new CategoryDetailResponse(1L, "Electronics"),
+                new CategoryDetailResponse(2L, "Clothing")
         ), 0, 50, 2L, 1, true);
         when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(response);
 
@@ -60,7 +62,7 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_empty_returns200() throws Exception {
-        when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(new CategoryResponse(List.of(), 0, 50, 0L, 0, true));
+        when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(new CategoryListResponse(List.of(), 0, 50, 0L, 0, true));
 
         mockMvc.perform(get("/api/public/categories"))
                 .andExpect(status().isOk())
@@ -70,12 +72,12 @@ class CategoryControllerTest {
 
     @Test
     void createCategory_returns201() throws Exception {
-        CategoryDTO resultDTO = new CategoryDTO(1L, "Electronics");
-        when(categoryService.createCategory(any(CategoryDTO.class))).thenReturn(resultDTO);
+        CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Electronics");
+        when(categoryService.createCategory(any(CreateCategoryRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(post("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CategoryDTO(null, "Electronics"))))
+                        .content(objectMapper.writeValueAsString(new CreateCategoryRequest("Electronics"))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Electronics"));
@@ -83,19 +85,19 @@ class CategoryControllerTest {
 
     @Test
     void createCategory_duplicate_returns400() throws Exception {
-        when(categoryService.createCategory(any(CategoryDTO.class)))
+        when(categoryService.createCategory(any(CreateCategoryRequest.class)))
                 .thenThrow(new APIException("Category with the name Electronics already exists"));
 
         mockMvc.perform(post("/api/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CategoryDTO(null, "Electronics"))))
+                        .content(objectMapper.writeValueAsString(new CreateCategoryRequest("Electronics"))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Category with the name Electronics already exists"));
     }
 
     @Test
     void deleteCategory_returns200() throws Exception {
-        CategoryDTO dto = new CategoryDTO(1L, "Electronics");
+        CategoryDetailResponse dto = new CategoryDetailResponse(1L, "Electronics");
         when(categoryService.deleteCategory(1L)).thenReturn(dto);
 
         mockMvc.perform(delete("/api/admin/categories/1"))
@@ -116,12 +118,12 @@ class CategoryControllerTest {
 
     @Test
     void updateCategory_returns200() throws Exception {
-        CategoryDTO resultDTO = new CategoryDTO(1L, "Updated");
-        when(categoryService.updateCategory(eq(1L), any(CategoryDTO.class))).thenReturn(resultDTO);
+        CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Updated");
+        when(categoryService.updateCategory(eq(1L), any(UpdateCategoryRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(put("/api/admin/categories/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CategoryDTO(null, "Updated"))))
+                        .content(objectMapper.writeValueAsString(new UpdateCategoryRequest("Updated"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Updated"));
@@ -129,12 +131,12 @@ class CategoryControllerTest {
 
     @Test
     void updateCategory_notFound_returns404() throws Exception {
-        when(categoryService.updateCategory(eq(99L), any(CategoryDTO.class)))
+        when(categoryService.updateCategory(eq(99L), any(UpdateCategoryRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Category", "id", 99L));
 
         mockMvc.perform(put("/api/admin/categories/99")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CategoryDTO(null, "Updated"))))
+                        .content(objectMapper.writeValueAsString(new UpdateCategoryRequest("Updated"))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Category with id: 99 not found"));
     }

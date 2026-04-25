@@ -1,21 +1,23 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.ProductDTO;
-import com.ecommerce.project.dto.ProductResponse;
+import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductDetailResponse;
+import com.ecommerce.project.dto.ProductListResponse;
+import com.ecommerce.project.dto.UpdateProductRequest;
 
 public interface ProductService {
 
-    ProductDTO createProduct(Long categoryId, ProductDTO productDTO);
+    ProductDetailResponse createProduct(Long categoryId, CreateProductRequest request);
 
-    ProductDTO updateProduct(Long productId, ProductDTO productDTO);
+    ProductDetailResponse updateProduct(Long productId, UpdateProductRequest request);
 
-    ProductDTO deleteProduct(Long productId);
+    ProductDetailResponse deleteProduct(Long productId);
 
-    ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    ProductListResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
-    ProductDTO getProductById(Long productId);
+    ProductDetailResponse getProductById(Long productId);
 
-    ProductResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    ProductListResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
-    ProductResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+    ProductListResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 }

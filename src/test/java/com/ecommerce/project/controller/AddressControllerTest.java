@@ -1,7 +1,9 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.dto.AddressDTO;
-import com.ecommerce.project.dto.AddressResponse;
+import com.ecommerce.project.dto.AddressDetailResponse;
+import com.ecommerce.project.dto.AddressListResponse;
+import com.ecommerce.project.dto.CreateAddressRequest;
+import com.ecommerce.project.dto.UpdateAddressRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
@@ -41,9 +43,9 @@ class AddressControllerTest {
 
     @Test
     void getAllAddresses_returns200WithAddresses() throws Exception {
-        AddressDTO dto1 = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        AddressDTO dto2 = new AddressDTO(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
-        AddressResponse response = new AddressResponse(List.of(dto1, dto2));
+        AddressDetailResponse dto1 = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse dto2 = new AddressDetailResponse(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
+        AddressListResponse response = new AddressListResponse(List.of(dto1, dto2));
         when(addressService.getAllAddresses()).thenReturn(response);
 
         mockMvc.perform(get("/api/addresses"))
@@ -56,7 +58,7 @@ class AddressControllerTest {
 
     @Test
     void getAllAddresses_empty_returns200() throws Exception {
-        when(addressService.getAllAddresses()).thenReturn(new AddressResponse(List.of()));
+        when(addressService.getAllAddresses()).thenReturn(new AddressListResponse(List.of()));
 
         mockMvc.perform(get("/api/addresses"))
                 .andExpect(status().isOk())
@@ -66,7 +68,7 @@ class AddressControllerTest {
 
     @Test
     void getAddressById_returns200() throws Exception {
-        AddressDTO dto = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse dto = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
         when(addressService.getAddressById(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/addresses/1"))
@@ -91,8 +93,8 @@ class AddressControllerTest {
 
     @Test
     void createAddress_returns201() throws Exception {
-        AddressDTO resultDTO = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        when(addressService.createAddress(any(AddressDTO.class))).thenReturn(resultDTO);
+        AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        when(addressService.createAddress(any(CreateAddressRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(post("/api/addresses")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +102,7 @@ class AddressControllerTest {
                                 {
                                     "streetLine1": "123 Main St",
                                     "city": "New York",
-                                    "state": "NY",
+                                    "state": "New York",
                                     "country": "USA",
                                     "zipCode": "10001"
                                 }
@@ -116,8 +118,8 @@ class AddressControllerTest {
 
     @Test
     void updateAddress_returns200() throws Exception {
-        AddressDTO resultDTO = new AddressDTO(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
-        when(addressService.updateAddress(eq(1L), any(AddressDTO.class))).thenReturn(resultDTO);
+        AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
+        when(addressService.updateAddress(eq(1L), any(UpdateAddressRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(put("/api/addresses/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +127,7 @@ class AddressControllerTest {
                                 {
                                     "streetLine1": "Updated St",
                                     "city": "Boston",
-                                    "state": "MA",
+                                    "state": "Massachusetts",
                                     "country": "USA",
                                     "zipCode": "02101"
                                 }
@@ -141,7 +143,7 @@ class AddressControllerTest {
 
     @Test
     void updateAddress_notFound_returns404() throws Exception {
-        when(addressService.updateAddress(eq(99L), any(AddressDTO.class)))
+        when(addressService.updateAddress(eq(99L), any(UpdateAddressRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
 
         mockMvc.perform(put("/api/addresses/99")
@@ -150,7 +152,7 @@ class AddressControllerTest {
                                 {
                                     "streetLine1": "Updated St",
                                     "city": "Boston",
-                                    "state": "MA",
+                                    "state": "Massachusetts",
                                     "country": "USA",
                                     "zipCode": "02101"
                                 }

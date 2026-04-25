@@ -1,10 +1,12 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.CategoryDetailResponse;
+import com.ecommerce.project.dto.CategoryListResponse;
+import com.ecommerce.project.dto.CreateCategoryRequest;
+import com.ecommerce.project.dto.UpdateCategoryRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
-import com.ecommerce.project.dto.CategoryDTO;
-import com.ecommerce.project.dto.CategoryResponse;
 import com.ecommerce.project.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     private ModelMapper modelMapper;
 
     @Override
-    public CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public CategoryListResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -35,12 +37,12 @@ public class CategoryServiceImpl implements CategoryService {
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sort);
         Page<Category> categoryPage = categoryRepository.findAll(pageDetails);
 
-        List<CategoryDTO> categoryDTOS = categoryPage.getContent().stream()
-                .map(category -> modelMapper.map(category, CategoryDTO.class))
+        List<CategoryDetailResponse> responses = categoryPage.getContent().stream()
+                .map(category -> modelMapper.map(category, CategoryDetailResponse.class))
                 .toList();
 
-        return new CategoryResponse(
-                categoryDTOS,
+        return new CategoryListResponse(
+                responses,
                 categoryPage.getNumber(),
                 categoryPage.getSize(),
                 categoryPage.getTotalElements(),
@@ -50,27 +52,29 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
-        Category category = modelMapper.map(categoryDTO, Category.class);
-        Category savedCategory = categoryRepository.findByName(category.getName());
-        if (savedCategory != null) {
+    public CategoryDetailResponse createCategory(CreateCategoryRequest request) {
+        Category category = modelMapper.map(request, Category.class);
+        Category existing = categoryRepository.findByName(category.getName());
+        if (existing != null) {
             throw new APIException("Category with the name " + category.getName() + " already exists");
         }
-        return modelMapper.map(categoryRepository.save(category), CategoryDTO.class);
+        return modelMapper.map(categoryRepository.save(category), CategoryDetailResponse.class);
     }
 
     @Override
-    public CategoryDTO deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+    public CategoryDetailResponse deleteCategory(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         categoryRepository.deleteById(id);
-        return modelMapper.map(category, CategoryDTO.class);
+        return modelMapper.map(category, CategoryDetailResponse.class);
     }
 
     @Override
-    public CategoryDTO updateCategory(Long id, CategoryDTO categoryDTO) {
-        categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
-        Category category = modelMapper.map(categoryDTO, Category.class);
+    public CategoryDetailResponse updateCategory(Long id, UpdateCategoryRequest request) {
+        categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+        Category category = modelMapper.map(request, Category.class);
         category.setId(id);
-        return modelMapper.map(categoryRepository.save(category), CategoryDTO.class);
+        return modelMapper.map(categoryRepository.save(category), CategoryDetailResponse.class);
     }
 }

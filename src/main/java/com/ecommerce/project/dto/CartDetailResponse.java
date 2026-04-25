@@ -11,8 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CartDTO {
-
+public class CartDetailResponse {
     private Long id;
     private BigDecimal totalPrice;
     private List<CartItemDTO> cartItems = new ArrayList<>();

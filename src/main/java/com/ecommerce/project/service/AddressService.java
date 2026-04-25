@@ -1,17 +1,19 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.AddressDTO;
-import com.ecommerce.project.dto.AddressResponse;
+import com.ecommerce.project.dto.AddressDetailResponse;
+import com.ecommerce.project.dto.AddressListResponse;
+import com.ecommerce.project.dto.CreateAddressRequest;
+import com.ecommerce.project.dto.UpdateAddressRequest;
 
 public interface AddressService {
 
-    AddressResponse getAllAddresses();
+    AddressListResponse getAllAddresses();
 
-    AddressDTO getAddressById(Long id);
+    AddressDetailResponse getAddressById(Long id);
 
-    AddressDTO createAddress(AddressDTO addressDTO);
+    AddressDetailResponse createAddress(CreateAddressRequest request);
 
-    AddressDTO updateAddress(Long id, AddressDTO addressDTO);
+    AddressDetailResponse updateAddress(Long id, UpdateAddressRequest request);
 
     void deleteAddress(Long id);
 }

@@ -1,7 +1,9 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.AddressDTO;
-import com.ecommerce.project.dto.AddressResponse;
+import com.ecommerce.project.dto.AddressDetailResponse;
+import com.ecommerce.project.dto.AddressListResponse;
+import com.ecommerce.project.dto.CreateAddressRequest;
+import com.ecommerce.project.dto.UpdateAddressRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
@@ -54,15 +56,15 @@ class AddressServiceImplTest {
         address2.setState("CA");
         address2.setCountry("USA");
         address2.setZipCode("90001");
-        AddressDTO dto1 = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        AddressDTO dto2 = new AddressDTO(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
+        AddressDetailResponse dto1 = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse dto2 = new AddressDetailResponse(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
 
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByUser(user)).thenReturn(List.of(address1, address2));
-        when(modelMapper.map(address1, AddressDTO.class)).thenReturn(dto1);
-        when(modelMapper.map(address2, AddressDTO.class)).thenReturn(dto2);
+        when(modelMapper.map(address1, AddressDetailResponse.class)).thenReturn(dto1);
+        when(modelMapper.map(address2, AddressDetailResponse.class)).thenReturn(dto2);
 
-        AddressResponse result = addressService.getAllAddresses();
+        AddressListResponse result = addressService.getAllAddresses();
 
         assertEquals(2, result.getContent().size());
         assertEquals("123 Main St", result.getContent().get(0).getStreetLine1());
@@ -74,7 +76,7 @@ class AddressServiceImplTest {
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByUser(user)).thenReturn(List.of());
 
-        AddressResponse result = addressService.getAllAddresses();
+        AddressListResponse result = addressService.getAllAddresses();
 
         assertTrue(result.getContent().isEmpty());
     }
@@ -90,13 +92,13 @@ class AddressServiceImplTest {
         address.setState("NY");
         address.setCountry("USA");
         address.setZipCode("10001");
-        AddressDTO dto = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse dto = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
 
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(address));
-        when(modelMapper.map(address, AddressDTO.class)).thenReturn(dto);
+        when(modelMapper.map(address, AddressDetailResponse.class)).thenReturn(dto);
 
-        AddressDTO result = addressService.getAddressById(1L);
+        AddressDetailResponse result = addressService.getAddressById(1L);
 
         assertEquals(1L, result.getId());
         assertEquals("123 Main St", result.getStreetLine1());
@@ -117,7 +119,7 @@ class AddressServiceImplTest {
     void createAddress_success() {
         User user = new User();
         user.setId(1L);
-        AddressDTO inputDTO = new AddressDTO(null, "123 Main St", null, "New York", "NY", "USA", "10001");
+        CreateAddressRequest request = new CreateAddressRequest("123 Main St", null, "New York", "NY", "USA", "10001");
         Address mappedAddress = new Address();
         mappedAddress.setStreetLine1("123 Main St");
         mappedAddress.setCity("New York");
@@ -131,14 +133,14 @@ class AddressServiceImplTest {
         savedAddress.setState("NY");
         savedAddress.setCountry("USA");
         savedAddress.setZipCode("10001");
-        AddressDTO resultDTO = new AddressDTO(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
 
         when(authUtils.loggedInUser()).thenReturn(user);
-        when(modelMapper.map(inputDTO, Address.class)).thenReturn(mappedAddress);
+        when(modelMapper.map(request, Address.class)).thenReturn(mappedAddress);
         when(addressRepository.save(mappedAddress)).thenReturn(savedAddress);
-        when(modelMapper.map(savedAddress, AddressDTO.class)).thenReturn(resultDTO);
+        when(modelMapper.map(savedAddress, AddressDetailResponse.class)).thenReturn(resultDTO);
 
-        AddressDTO result = addressService.createAddress(inputDTO);
+        AddressDetailResponse result = addressService.createAddress(request);
 
         assertEquals(1L, result.getId());
         assertEquals("123 Main St", result.getStreetLine1());
@@ -149,7 +151,7 @@ class AddressServiceImplTest {
     void updateAddress_success() {
         User user = new User();
         user.setId(1L);
-        AddressDTO inputDTO = new AddressDTO(null, "Updated St", null, "Boston", "MA", "USA", "02101");
+        UpdateAddressRequest request = new UpdateAddressRequest("Updated St", null, "Boston", "MA", "USA", "02101");
         Address existingAddress = new Address();
         existingAddress.setId(1L);
         existingAddress.setStreetLine1("123 Main St");
@@ -167,15 +169,15 @@ class AddressServiceImplTest {
         savedAddress.setState("MA");
         savedAddress.setCountry("USA");
         savedAddress.setZipCode("02101");
-        AddressDTO resultDTO = new AddressDTO(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
+        AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
 
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(existingAddress));
-        when(modelMapper.map(inputDTO, Address.class)).thenReturn(mappedAddress);
+        when(modelMapper.map(request, Address.class)).thenReturn(mappedAddress);
         when(addressRepository.save(mappedAddress)).thenReturn(savedAddress);
-        when(modelMapper.map(savedAddress, AddressDTO.class)).thenReturn(resultDTO);
+        when(modelMapper.map(savedAddress, AddressDetailResponse.class)).thenReturn(resultDTO);
 
-        AddressDTO result = addressService.updateAddress(1L, inputDTO);
+        AddressDetailResponse result = addressService.updateAddress(1L, request);
 
         assertEquals(1L, result.getId());
         assertEquals("Updated St", result.getStreetLine1());
@@ -186,12 +188,12 @@ class AddressServiceImplTest {
     void updateAddress_notFound_throwsResourceNotFoundException() {
         User user = new User();
         user.setId(1L);
-        AddressDTO inputDTO = new AddressDTO(null, "Updated St", null, "Boston", "MA", "USA", "02101");
+        UpdateAddressRequest request = new UpdateAddressRequest("Updated St", null, "Boston", "MA", "USA", "02101");
         when(authUtils.loggedInUser()).thenReturn(user);
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> addressService.updateAddress(99L, inputDTO));
+                () -> addressService.updateAddress(99L, request));
     }
 
     @Test

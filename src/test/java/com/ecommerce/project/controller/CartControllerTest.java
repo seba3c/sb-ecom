@@ -1,9 +1,9 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.dto.CartDTO;
+import com.ecommerce.project.dto.CartDetailResponse;
 import com.ecommerce.project.dto.CartItemDTO;
-import com.ecommerce.project.dto.CartResponse;
-import com.ecommerce.project.dto.ProductDTO;
+import com.ecommerce.project.dto.CartListResponse;
+import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
@@ -40,10 +40,10 @@ class CartControllerTest {
     @MockitoBean
     private UserDetailsServiceImpl userDetailsService;
 
-    private CartDTO sampleCart() {
-        ProductDTO product = new ProductDTO(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
+    private CartDetailResponse sampleCart() {
+        ProductDetailResponse product = new ProductDetailResponse(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
         CartItemDTO item = new CartItemDTO(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, product);
-        CartDTO cart = new CartDTO();
+        CartDetailResponse cart = new CartDetailResponse();
         cart.setId(1L);
         cart.setTotalPrice(BigDecimal.valueOf(1999.98));
         cart.setCartItems(List.of(item));
@@ -86,7 +86,7 @@ class CartControllerTest {
 
     @Test
     void updateProductQuantity_success_returns200() throws Exception {
-        CartDTO updated = sampleCart();
+        CartDetailResponse updated = sampleCart();
         updated.getCartItems().get(0);
         when(cartService.updateProductQuantity(1L, 5)).thenReturn(updated);
 
@@ -112,7 +112,7 @@ class CartControllerTest {
 
     @Test
     void removeProductFromCart_success_returns200() throws Exception {
-        CartDTO emptyCart = new CartDTO();
+        CartDetailResponse emptyCart = new CartDetailResponse();
         emptyCart.setId(1L);
         emptyCart.setTotalPrice(BigDecimal.ZERO);
         emptyCart.setCartItems(new ArrayList<>());
@@ -135,7 +135,7 @@ class CartControllerTest {
 
     @Test
     void getAllCarts_success_returns200() throws Exception {
-        CartResponse response = new CartResponse(List.of(sampleCart()), 0, 50, 1L, 1, true);
+        CartListResponse response = new CartListResponse(List.of(sampleCart()), 0, 50, 1L, 1, true);
         when(cartService.getAllCarts(any(), any(), any(), any())).thenReturn(response);
 
         mockMvc.perform(get("/api/admin/carts"))

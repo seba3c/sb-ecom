@@ -1,7 +1,9 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.AddressDTO;
-import com.ecommerce.project.dto.AddressResponse;
+import com.ecommerce.project.dto.AddressDetailResponse;
+import com.ecommerce.project.dto.AddressListResponse;
+import com.ecommerce.project.dto.CreateAddressRequest;
+import com.ecommerce.project.dto.UpdateAddressRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
@@ -26,42 +28,42 @@ public class AddressServiceImpl implements AddressService {
     private ModelMapper modelMapper;
 
     @Override
-    public AddressResponse getAllAddresses() {
+    public AddressListResponse getAllAddresses() {
         User user = authUtils.loggedInUser();
         List<Address> addresses = addressRepository.findByUser(user);
-        List<AddressDTO> addressDTOs = addresses.stream()
-                .map(address -> modelMapper.map(address, AddressDTO.class))
+        List<AddressDetailResponse> responses = addresses.stream()
+                .map(address -> modelMapper.map(address, AddressDetailResponse.class))
                 .toList();
-        return new AddressResponse(addressDTOs);
+        return new AddressListResponse(responses);
     }
 
     @Override
-    public AddressDTO getAddressById(Long id) {
+    public AddressDetailResponse getAddressById(Long id) {
         User user = authUtils.loggedInUser();
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
-        return modelMapper.map(address, AddressDTO.class);
+        return modelMapper.map(address, AddressDetailResponse.class);
     }
 
     @Override
-    public AddressDTO createAddress(AddressDTO addressDTO) {
+    public AddressDetailResponse createAddress(CreateAddressRequest request) {
         User user = authUtils.loggedInUser();
-        Address address = modelMapper.map(addressDTO, Address.class);
+        Address address = modelMapper.map(request, Address.class);
         address.setUser(user);
         Address savedAddress = addressRepository.save(address);
-        return modelMapper.map(savedAddress, AddressDTO.class);
+        return modelMapper.map(savedAddress, AddressDetailResponse.class);
     }
 
     @Override
-    public AddressDTO updateAddress(Long id, AddressDTO addressDTO) {
+    public AddressDetailResponse updateAddress(Long id, UpdateAddressRequest request) {
         User user = authUtils.loggedInUser();
         addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
-        Address address = modelMapper.map(addressDTO, Address.class);
+        Address address = modelMapper.map(request, Address.class);
         address.setId(id);
         address.setUser(user);
         Address savedAddress = addressRepository.save(address);
-        return modelMapper.map(savedAddress, AddressDTO.class);
+        return modelMapper.map(savedAddress, AddressDetailResponse.class);
     }
 
     @Override

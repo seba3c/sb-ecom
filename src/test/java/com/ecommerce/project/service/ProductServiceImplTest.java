@@ -1,8 +1,10 @@
 package com.ecommerce.project.service;
 
-import com.ecommerce.project.dto.CategoryDTO;
-import com.ecommerce.project.dto.ProductDTO;
-import com.ecommerce.project.dto.ProductResponse;
+import com.ecommerce.project.dto.CategoryDetailResponse;
+import com.ecommerce.project.dto.CreateProductRequest;
+import com.ecommerce.project.dto.ProductDetailResponse;
+import com.ecommerce.project.dto.ProductListResponse;
+import com.ecommerce.project.dto.UpdateProductRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -46,7 +48,7 @@ class ProductServiceImplTest {
 
     private Category category;
     private Product product;
-    private ProductDTO productDTO;
+    private ProductDetailResponse productDTO;
 
     @BeforeEach
     void setUp() {
@@ -63,23 +65,23 @@ class ProductServiceImplTest {
         product.setDiscount(BigDecimal.valueOf(0.1));
         product.setCategory(category);
 
-        productDTO = new ProductDTO(1L, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1),
-                new CategoryDTO(1L, "Electronics"));
+        productDTO = new ProductDetailResponse(1L, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1),
+                new CategoryDetailResponse(1L, "Electronics"));
     }
 
     @Test
     void createProduct_success() {
-        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1), null);
+        CreateProductRequest request = new CreateProductRequest("Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1));
         Product mappedProduct = new Product();
         mappedProduct.setName("Laptop Pro");
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.findByName("Laptop Pro")).thenReturn(null);
-        when(modelMapper.map(inputDTO, Product.class)).thenReturn(mappedProduct);
+        when(modelMapper.map(request, Product.class)).thenReturn(mappedProduct);
         when(productRepository.save(mappedProduct)).thenReturn(product);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductDTO result = productService.createProduct(1L, inputDTO);
+        ProductDetailResponse result = productService.createProduct(1L, request);
 
         assertEquals("Laptop Pro", result.getName());
         assertEquals(1L, result.getId());
@@ -91,18 +93,18 @@ class ProductServiceImplTest {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> productService.createProduct(99L, new ProductDTO()));
+                () -> productService.createProduct(99L, new CreateProductRequest()));
     }
 
     @Test
     void createProduct_duplicateName_throwsAPIException() {
-        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO, null);
+        CreateProductRequest request = new CreateProductRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.findByName("Laptop Pro")).thenReturn(product);
 
         APIException ex = assertThrows(APIException.class,
-                () -> productService.createProduct(1L, inputDTO));
+                () -> productService.createProduct(1L, request));
 
         assertTrue(ex.getMessage().contains("Laptop Pro"));
         verify(productRepository, never()).save(any());
@@ -110,13 +112,13 @@ class ProductServiceImplTest {
 
     @Test
     void updateProduct_success() {
-        ProductDTO inputDTO = new ProductDTO(null, "Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05), null);
+        UpdateProductRequest request = new UpdateProductRequest("Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05));
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(product)).thenReturn(product);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductDTO result = productService.updateProduct(1L, inputDTO);
+        ProductDetailResponse result = productService.updateProduct(1L, request);
 
         assertNotNull(result);
         verify(productRepository).save(product);
@@ -132,7 +134,7 @@ class ProductServiceImplTest {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> productService.updateProduct(99L, new ProductDTO()));
+                () -> productService.updateProduct(99L, new UpdateProductRequest()));
 
         verify(productRepository, never()).save(any());
     }
@@ -140,9 +142,9 @@ class ProductServiceImplTest {
     @Test
     void deleteProduct_success() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductDTO result = productService.deleteProduct(1L);
+        ProductDetailResponse result = productService.deleteProduct(1L);
 
         assertEquals(1L, result.getId());
         verify(productRepository).deleteById(1L);
@@ -162,9 +164,9 @@ class ProductServiceImplTest {
     void getAllProducts_returnsPaginatedResponse() {
         Page<Product> page = new PageImpl<>(List.of(product));
         when(productRepository.findAll(any(Pageable.class))).thenReturn(page);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductResponse response = productService.getAllProducts(0, 50, "id", "asc");
+        ProductListResponse response = productService.getAllProducts(0, 50, "id", "asc");
 
         assertEquals(1, response.getContent().size());
         assertEquals("Laptop Pro", response.getContent().get(0).getName());
@@ -173,9 +175,9 @@ class ProductServiceImplTest {
     @Test
     void getProductById_success() {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductDTO result = productService.getProductById(1L);
+        ProductDetailResponse result = productService.getProductById(1L);
 
         assertEquals(1L, result.getId());
     }
@@ -193,9 +195,9 @@ class ProductServiceImplTest {
         Page<Product> page = new PageImpl<>(List.of(product));
         when(productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
                 eq("laptop"), eq("laptop"), any(Pageable.class))).thenReturn(page);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductResponse response = productService.getProductsByKeyword("laptop", 0, 50, "id", "asc");
+        ProductListResponse response = productService.getProductsByKeyword("laptop", 0, 50, "id", "asc");
 
         assertEquals(1, response.getContent().size());
     }
@@ -205,7 +207,7 @@ class ProductServiceImplTest {
         when(productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
                 eq("xyz"), eq("xyz"), any(Pageable.class))).thenReturn(Page.empty());
 
-        ProductResponse response = productService.getProductsByKeyword("xyz", 0, 50, "id", "asc");
+        ProductListResponse response = productService.getProductsByKeyword("xyz", 0, 50, "id", "asc");
 
         assertTrue(response.getContent().isEmpty());
     }
@@ -215,9 +217,9 @@ class ProductServiceImplTest {
         Page<Product> page = new PageImpl<>(List.of(product));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.findByCategory(eq(category), any(Pageable.class))).thenReturn(page);
-        when(modelMapper.map(product, ProductDTO.class)).thenReturn(productDTO);
+        when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
-        ProductResponse response = productService.getProductsByCategory(1L, 0, 50, "id", "asc");
+        ProductListResponse response = productService.getProductsByCategory(1L, 0, 50, "id", "asc");
 
         assertEquals(1, response.getContent().size());
     }

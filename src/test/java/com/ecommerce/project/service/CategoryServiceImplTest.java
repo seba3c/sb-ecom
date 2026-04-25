@@ -1,10 +1,12 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.CategoryDetailResponse;
+import com.ecommerce.project.dto.CategoryListResponse;
+import com.ecommerce.project.dto.CreateCategoryRequest;
+import com.ecommerce.project.dto.UpdateCategoryRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
-import com.ecommerce.project.dto.CategoryDTO;
-import com.ecommerce.project.dto.CategoryResponse;
 import com.ecommerce.project.repository.CategoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,15 +47,15 @@ class CategoryServiceImplTest {
         cat2.setId(2L);
         cat2.setName("Clothing");
 
-        CategoryDTO dto1 = new CategoryDTO(1L, "Electronics");
-        CategoryDTO dto2 = new CategoryDTO(2L, "Clothing");
+        CategoryDetailResponse dto1 = new CategoryDetailResponse(1L, "Electronics");
+        CategoryDetailResponse dto2 = new CategoryDetailResponse(2L, "Clothing");
 
         Page<Category> page = new PageImpl<>(List.of(cat1, cat2));
         when(categoryRepository.findAll(any(Pageable.class))).thenReturn(page);
-        when(modelMapper.map(cat1, CategoryDTO.class)).thenReturn(dto1);
-        when(modelMapper.map(cat2, CategoryDTO.class)).thenReturn(dto2);
+        when(modelMapper.map(cat1, CategoryDetailResponse.class)).thenReturn(dto1);
+        when(modelMapper.map(cat2, CategoryDetailResponse.class)).thenReturn(dto2);
 
-        CategoryResponse response = categoryService.getAllCategories(0, 50, "id", "asc");
+        CategoryListResponse response = categoryService.getAllCategories(0, 50, "id", "asc");
 
         assertEquals(2, response.getContent().size());
         assertEquals("Electronics", response.getContent().get(0).getName());
@@ -64,27 +66,27 @@ class CategoryServiceImplTest {
     void getAllCategories_emptyList_returnsEmptyContent() {
         when(categoryRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());
 
-        CategoryResponse response = categoryService.getAllCategories(0, 50, "id", "asc");
+        CategoryListResponse response = categoryService.getAllCategories(0, 50, "id", "asc");
 
         assertTrue(response.getContent().isEmpty());
     }
 
     @Test
     void createCategory_success() {
-        CategoryDTO inputDTO = new CategoryDTO(null, "Electronics");
+        CreateCategoryRequest request = new CreateCategoryRequest("Electronics");
         Category mappedCategory = new Category();
         mappedCategory.setName("Electronics");
         Category savedCategory = new Category();
         savedCategory.setId(1L);
         savedCategory.setName("Electronics");
-        CategoryDTO resultDTO = new CategoryDTO(1L, "Electronics");
+        CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Electronics");
 
-        when(modelMapper.map(inputDTO, Category.class)).thenReturn(mappedCategory);
+        when(modelMapper.map(request, Category.class)).thenReturn(mappedCategory);
         when(categoryRepository.findByName("Electronics")).thenReturn(null);
         when(categoryRepository.save(mappedCategory)).thenReturn(savedCategory);
-        when(modelMapper.map(savedCategory, CategoryDTO.class)).thenReturn(resultDTO);
+        when(modelMapper.map(savedCategory, CategoryDetailResponse.class)).thenReturn(resultDTO);
 
-        CategoryDTO result = categoryService.createCategory(inputDTO);
+        CategoryDetailResponse result = categoryService.createCategory(request);
 
         assertEquals(1L, result.getId());
         assertEquals("Electronics", result.getName());
@@ -93,18 +95,18 @@ class CategoryServiceImplTest {
 
     @Test
     void createCategory_duplicateName_throwsAPIException() {
-        CategoryDTO inputDTO = new CategoryDTO(null, "Electronics");
+        CreateCategoryRequest request = new CreateCategoryRequest("Electronics");
         Category mappedCategory = new Category();
         mappedCategory.setName("Electronics");
         Category existingCategory = new Category();
         existingCategory.setId(1L);
         existingCategory.setName("Electronics");
 
-        when(modelMapper.map(inputDTO, Category.class)).thenReturn(mappedCategory);
+        when(modelMapper.map(request, Category.class)).thenReturn(mappedCategory);
         when(categoryRepository.findByName("Electronics")).thenReturn(existingCategory);
 
         APIException ex = assertThrows(APIException.class,
-                () -> categoryService.createCategory(inputDTO));
+                () -> categoryService.createCategory(request));
 
         assertTrue(ex.getMessage().contains("Electronics"));
         assertTrue(ex.getMessage().contains("already exists"));
@@ -116,12 +118,12 @@ class CategoryServiceImplTest {
         Category category = new Category();
         category.setId(1L);
         category.setName("Electronics");
-        CategoryDTO dto = new CategoryDTO(1L, "Electronics");
+        CategoryDetailResponse dto = new CategoryDetailResponse(1L, "Electronics");
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(modelMapper.map(category, CategoryDTO.class)).thenReturn(dto);
+        when(modelMapper.map(category, CategoryDetailResponse.class)).thenReturn(dto);
 
-        CategoryDTO result = categoryService.deleteCategory(1L);
+        CategoryDetailResponse result = categoryService.deleteCategory(1L);
 
         assertEquals(1L, result.getId());
         verify(categoryRepository).deleteById(1L);
@@ -139,7 +141,7 @@ class CategoryServiceImplTest {
 
     @Test
     void updateCategory_success() {
-        CategoryDTO inputDTO = new CategoryDTO(null, "Updated Name");
+        UpdateCategoryRequest request = new UpdateCategoryRequest("Updated Name");
         Category existingCategory = new Category();
         existingCategory.setId(1L);
         existingCategory.setName("Old Name");
@@ -148,14 +150,14 @@ class CategoryServiceImplTest {
         Category savedCategory = new Category();
         savedCategory.setId(1L);
         savedCategory.setName("Updated Name");
-        CategoryDTO resultDTO = new CategoryDTO(1L, "Updated Name");
+        CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Updated Name");
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(existingCategory));
-        when(modelMapper.map(inputDTO, Category.class)).thenReturn(mappedCategory);
+        when(modelMapper.map(request, Category.class)).thenReturn(mappedCategory);
         when(categoryRepository.save(mappedCategory)).thenReturn(savedCategory);
-        when(modelMapper.map(savedCategory, CategoryDTO.class)).thenReturn(resultDTO);
+        when(modelMapper.map(savedCategory, CategoryDetailResponse.class)).thenReturn(resultDTO);
 
-        CategoryDTO result = categoryService.updateCategory(1L, inputDTO);
+        CategoryDetailResponse result = categoryService.updateCategory(1L, request);
 
         assertEquals(1L, result.getId());
         assertEquals("Updated Name", result.getName());
@@ -168,7 +170,7 @@ class CategoryServiceImplTest {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> categoryService.updateCategory(99L, new CategoryDTO(null, "Name")));
+                () -> categoryService.updateCategory(99L, new UpdateCategoryRequest("Name")));
 
         verify(categoryRepository, never()).save(any());
     }
