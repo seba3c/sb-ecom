@@ -1,0 +1,130 @@
+package com.ecommerce.project.service;
+
+import com.ecommerce.project.dto.OrderDetailResponse;
+import com.ecommerce.project.dto.OrderItemDetail;
+import com.ecommerce.project.dto.PaymentDetail;
+import com.ecommerce.project.dto.ProductDetailResponse;
+import com.ecommerce.project.exception.APIException;
+import com.ecommerce.project.exception.ResourceNotFoundException;
+import com.ecommerce.project.model.*;
+import com.ecommerce.project.repository.*;
+import com.ecommerce.project.security.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@Transactional
+public class OrderServiceImpl implements OrderService {
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Override
+    public OrderDetailResponse placeOrder(
+            Long userId,
+            Long addressId,
+            String paymentMethod,
+            String pgName,
+            String pgPaymentId,
+            String pgStatus,
+            String pgResponse
+    ) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new APIException("Cart not found for user"));
+
+        if (cart.getCartItems().isEmpty()) {
+            throw new APIException("Cart is empty");
+        }
+
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+
+        Payment payment = new Payment(paymentMethod, pgName, pgPaymentId, pgStatus, pgResponse);
+
+        Order order = new Order();
+        order.setUser(user);
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus(OrderStatus.PENDING);
+        order.setShippingAddress(address);
+        order.setPayment(payment);
+
+        for (CartItem cartItem : cart.getCartItems()) {
+            Product product = cartItem.getProduct();
+            if (product.getQuantity() < cartItem.getQuantity()) {
+                throw new APIException("Insufficient stock for product: " + product.getName());
+            }
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setPrice(cartItem.getPrice());
+            orderItem.setDiscount(cartItem.getDiscount());
+            order.getItems().add(orderItem);
+
+            product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+            productRepository.save(product);
+        }
+
+        BigDecimal totalAmount = order.getItems().stream()
+                .map(i -> i.getPrice().subtract(i.getDiscount())
+                        .multiply(BigDecimal.valueOf(i.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.setTotalAmount(totalAmount);
+
+        Order savedOrder = orderRepository.save(order);
+
+        cart.getCartItems().clear();
+        cart.setTotalPrice(BigDecimal.ZERO);
+        cartRepository.save(cart);
+
+        return toOrderDetailResponse(savedOrder);
+    }
+
+    private OrderDetailResponse toOrderDetailResponse(Order order) {
+        OrderDetailResponse response = new OrderDetailResponse();
+        response.setId(order.getId());
+        response.setEmail(order.getUser().getEmail());
+        response.setOrderDate(order.getOrderDate());
+        response.setTotalAmount(order.getTotalAmount());
+        response.setStatus(order.getStatus());
+        response.setShippingAddress(order.getShippingAddress().getId());
+        response.setPayment(modelMapper.map(order.getPayment(), PaymentDetail.class));
+        List<OrderItemDetail> items = order.getItems().stream()
+                .map(item -> {
+                    OrderItemDetail detail = new OrderItemDetail();
+                    detail.setId(item.getId());
+                    detail.setQuantity(item.getQuantity());
+                    detail.setPrice(item.getPrice());
+                    detail.setDiscount(item.getDiscount());
+                    detail.setProduct(modelMapper.map(item.getProduct(), ProductDetailResponse.class));
+                    return detail;
+                })
+                .toList();
+        response.setItems(items);
+        return response;
+    }
+}
