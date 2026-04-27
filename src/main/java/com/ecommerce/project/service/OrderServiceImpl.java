@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -97,7 +98,10 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        cart.getCartItems().clear();
+        new ArrayList<>(cart.getCartItems()).forEach(ci -> {
+            cart.getCartItems().remove(ci);
+            ci.setCart(null);
+        });
         cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
 
