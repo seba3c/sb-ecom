@@ -1,0 +1,37 @@
+package com.ecommerce.project.controller;
+
+import com.ecommerce.project.dto.OrderCreateRequest;
+import com.ecommerce.project.dto.OrderDetailResponse;
+import com.ecommerce.project.service.OrderService;
+import com.ecommerce.project.util.AuthUtils;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private AuthUtils authUtils;
+
+    @PostMapping
+    public ResponseEntity<OrderDetailResponse> placeOrder(@Valid @RequestBody OrderCreateRequest request) {
+        Long userId = authUtils.loggedInUser().getId();
+        OrderDetailResponse response = orderService.placeOrder(
+                userId,
+                request.getAddressId(),
+                request.getPaymentMethod(),
+                request.getPgName(),
+                request.getPgPaymentId(),
+                request.getPgStatus(),
+                request.getPgResponse()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}
