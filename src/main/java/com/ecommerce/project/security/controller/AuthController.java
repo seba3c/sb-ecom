@@ -1,5 +1,6 @@
 package com.ecommerce.project.security.controller;
 
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.model.AppRole;
 import com.ecommerce.project.model.Role;
 import com.ecommerce.project.model.User;
@@ -24,6 +25,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = SwaggerConfig.Tags.Auth.NAME, description = SwaggerConfig.Tags.Auth.DESCRIPTION)
 public class AuthController {
 
     @Autowired
@@ -66,19 +69,20 @@ public class AuthController {
         UserDetailsImpl userDetails = Objects.requireNonNull(
                 (UserDetailsImpl) authentication.getPrincipal());
 
-        UserInfoResponse response = getUserInfoResponse(userDetails);
-
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+        UserInfoResponse response = getUserInfoResponse(userDetails, jwtCookie.getValue());
+
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
     }
 
-    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails) {
+    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails, String jwtToken) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles);
+        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles, jwtToken);
     }
 
     @PostMapping("/signup")
@@ -143,7 +147,7 @@ public class AuthController {
         if (authentication != null) {
             UserDetailsImpl userDetails = Objects.requireNonNull(
                     (UserDetailsImpl) authentication.getPrincipal());
-            UserInfoResponse response = getUserInfoResponse(userDetails);
+            UserInfoResponse response = getUserInfoResponse(userDetails, null);
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.ok(new MessageResponse("No user details found"));

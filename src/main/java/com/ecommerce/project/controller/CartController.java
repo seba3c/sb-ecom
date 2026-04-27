@@ -1,5 +1,6 @@
 package com.ecommerce.project.controller;
 
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.config.AppConfig;
 import com.ecommerce.project.dto.CartDetailResponse;
 import com.ecommerce.project.dto.CartListResponse;
@@ -10,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
 @RequestMapping("/api")
+@Tag(name = SwaggerConfig.Tags.Cart.NAME, description = SwaggerConfig.Tags.Cart.DESCRIPTION)
 public class CartController {
 
     @Autowired

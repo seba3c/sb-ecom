@@ -1,5 +1,6 @@
 package com.ecommerce.project.controller;
 
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
 import com.ecommerce.project.dto.AddressCreateRequest;
@@ -10,10 +11,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/addresses")
+@Tag(name = SwaggerConfig.Tags.Address.NAME, description = SwaggerConfig.Tags.Address.DESCRIPTION)
 public class AddressController {
 
     @Autowired

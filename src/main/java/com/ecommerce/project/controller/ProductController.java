@@ -1,5 +1,6 @@
 package com.ecommerce.project.controller;
 
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.config.AppConfig;
 import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
@@ -9,11 +10,13 @@ import com.ecommerce.project.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = SwaggerConfig.Tags.Product.NAME, description = SwaggerConfig.Tags.Product.DESCRIPTION)
 public class ProductController {
 
     @Autowired
