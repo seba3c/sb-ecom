@@ -1,8 +1,6 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.OrderDetailResponse;
-import com.ecommerce.project.dto.PaymentDetail;
-import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.*;
@@ -37,9 +35,6 @@ class OrderServiceImplTest {
 
     @Mock
     private OrderRepository orderRepository;
-
-    @Mock
-    private PaymentRepository paymentRepository;
 
     @Mock
     private AddressRepository addressRepository;
@@ -112,12 +107,14 @@ class OrderServiceImplTest {
         savedPayment.setId(1L);
         savedOrder.setPayment(savedPayment);
 
+        OrderDetailResponse mockResponse = new OrderDetailResponse();
+        mockResponse.setId(1L);
+        mockResponse.setStatus(OrderStatus.PENDING);
+        mockResponse.setTotalAmount(BigDecimal.valueOf(1999.98));
+
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(any(Payment.class), eq(PaymentDetail.class)))
-                .thenReturn(new PaymentDetail(1L, "card", "Stripe", "pi_123", "succeeded", "OK"));
-        when(modelMapper.map(any(Product.class), eq(ProductDetailResponse.class)))
-                .thenReturn(new ProductDetailResponse(1L, "Laptop Pro", "desc", 8, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null));
+        when(modelMapper.map(any(Order.class), eq(OrderDetailResponse.class))).thenReturn(mockResponse);
 
         OrderDetailResponse result = orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK");
 
@@ -204,10 +201,7 @@ class OrderServiceImplTest {
 
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(cartRepository.save(cart)).thenReturn(cart);
-        when(modelMapper.map(any(Payment.class), eq(PaymentDetail.class)))
-                .thenReturn(new PaymentDetail(1L, "card", "Stripe", "pi_123", "succeeded", "OK"));
-        when(modelMapper.map(any(Product.class), eq(ProductDetailResponse.class)))
-                .thenReturn(new ProductDetailResponse(1L, "Laptop Pro", "desc", initialStock - orderedQty, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null));
+        when(modelMapper.map(any(Order.class), eq(OrderDetailResponse.class))).thenReturn(new OrderDetailResponse());
 
         orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK");
 

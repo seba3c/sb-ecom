@@ -1,9 +1,6 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.dto.OrderDetailResponse;
-import com.ecommerce.project.dto.OrderItemDetail;
-import com.ecommerce.project.dto.PaymentDetail;
-import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.*;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Transactional
@@ -109,26 +105,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderDetailResponse toOrderDetailResponse(Order order) {
-        OrderDetailResponse response = new OrderDetailResponse();
-        response.setId(order.getId());
+        OrderDetailResponse response = modelMapper.map(order, OrderDetailResponse.class);
         response.setEmail(order.getUser().getEmail());
-        response.setOrderDate(order.getOrderDate());
-        response.setTotalAmount(order.getTotalAmount());
-        response.setStatus(order.getStatus());
         response.setShippingAddress(order.getShippingAddress().getId());
-        response.setPayment(modelMapper.map(order.getPayment(), PaymentDetail.class));
-        List<OrderItemDetail> items = order.getItems().stream()
-                .map(item -> {
-                    OrderItemDetail detail = new OrderItemDetail();
-                    detail.setId(item.getId());
-                    detail.setQuantity(item.getQuantity());
-                    detail.setPrice(item.getPrice());
-                    detail.setDiscount(item.getDiscount());
-                    detail.setProduct(modelMapper.map(item.getProduct(), ProductDetailResponse.class));
-                    return detail;
-                })
-                .toList();
-        response.setItems(items);
         return response;
     }
 }
