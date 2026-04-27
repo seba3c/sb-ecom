@@ -1,5 +1,6 @@
 package com.ecommerce.project.controller;
 
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.dto.OrderCreateRequest;
 import com.ecommerce.project.dto.OrderDetailResponse;
 import com.ecommerce.project.service.OrderService;
@@ -8,10 +9,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
+@Tag(name = SwaggerConfig.Tags.Order.NAME, description = SwaggerConfig.Tags.Order.DESCRIPTION)
 public class OrderController {
 
     @Autowired

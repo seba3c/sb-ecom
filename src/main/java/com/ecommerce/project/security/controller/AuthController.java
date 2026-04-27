@@ -1,5 +1,6 @@
 package com.ecommerce.project.security.controller;
 
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.model.AppRole;
 import com.ecommerce.project.model.Role;
 import com.ecommerce.project.model.User;
@@ -24,6 +25,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = SwaggerConfig.Tags.Auth.NAME, description = SwaggerConfig.Tags.Auth.DESCRIPTION)
 public class AuthController {
 
     @Autowired
