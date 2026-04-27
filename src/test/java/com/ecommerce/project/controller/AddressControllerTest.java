@@ -5,9 +5,12 @@ import com.ecommerce.project.dto.AddressListResponse;
 import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
+import com.ecommerce.project.model.User;
 import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
 import com.ecommerce.project.service.AddressService;
+import com.ecommerce.project.util.AuthUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -17,8 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -36,17 +38,29 @@ class AddressControllerTest {
     private AddressService addressService;
 
     @MockitoBean
+    private AuthUtils authUtils;
+
+    @MockitoBean
     private JwtUtils jwtUtils;
 
     @MockitoBean
     private UserDetailsServiceImpl userDetailsService;
+
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        user = new User();
+        user.setId(1L);
+        when(authUtils.loggedInUser()).thenReturn(user);
+    }
 
     @Test
     void getAllAddresses_returns200WithAddresses() throws Exception {
         AddressDetailResponse dto1 = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
         AddressDetailResponse dto2 = new AddressDetailResponse(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
         AddressListResponse response = new AddressListResponse(List.of(dto1, dto2));
-        when(addressService.getAllAddresses()).thenReturn(response);
+        when(addressService.getAllAddresses(anyLong())).thenReturn(response);
 
         mockMvc.perform(get("/api/addresses"))
                 .andExpect(status().isOk())
@@ -58,7 +72,7 @@ class AddressControllerTest {
 
     @Test
     void getAllAddresses_empty_returns200() throws Exception {
-        when(addressService.getAllAddresses()).thenReturn(new AddressListResponse(List.of()));
+        when(addressService.getAllAddresses(anyLong())).thenReturn(new AddressListResponse(List.of()));
 
         mockMvc.perform(get("/api/addresses"))
                 .andExpect(status().isOk())
@@ -69,7 +83,7 @@ class AddressControllerTest {
     @Test
     void getAddressById_returns200() throws Exception {
         AddressDetailResponse dto = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        when(addressService.getAddressById(1L)).thenReturn(dto);
+        when(addressService.getAddressById(anyLong(), eq(1L))).thenReturn(dto);
 
         mockMvc.perform(get("/api/addresses/1"))
                 .andExpect(status().isOk())
@@ -83,7 +97,7 @@ class AddressControllerTest {
 
     @Test
     void getAddressById_notFound_returns404() throws Exception {
-        when(addressService.getAddressById(99L))
+        when(addressService.getAddressById(anyLong(), eq(99L)))
                 .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
 
         mockMvc.perform(get("/api/addresses/99"))
@@ -94,7 +108,7 @@ class AddressControllerTest {
     @Test
     void createAddress_returns201() throws Exception {
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        when(addressService.createAddress(any(AddressCreateRequest.class))).thenReturn(resultDTO);
+        when(addressService.createAddress(anyLong(), any(AddressCreateRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(post("/api/addresses")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +133,7 @@ class AddressControllerTest {
     @Test
     void updateAddress_returns200() throws Exception {
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
-        when(addressService.updateAddress(eq(1L), any(AddressUpdateRequest.class))).thenReturn(resultDTO);
+        when(addressService.updateAddress(anyLong(), eq(1L), any(AddressUpdateRequest.class))).thenReturn(resultDTO);
 
         mockMvc.perform(put("/api/addresses/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +157,7 @@ class AddressControllerTest {
 
     @Test
     void updateAddress_notFound_returns404() throws Exception {
-        when(addressService.updateAddress(eq(99L), any(AddressUpdateRequest.class)))
+        when(addressService.updateAddress(anyLong(), eq(99L), any(AddressUpdateRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
 
         mockMvc.perform(put("/api/addresses/99")
@@ -163,7 +177,7 @@ class AddressControllerTest {
 
     @Test
     void deleteAddress_returns204() throws Exception {
-        doNothing().when(addressService).deleteAddress(1L);
+        doNothing().when(addressService).deleteAddress(anyLong(), eq(1L));
 
         mockMvc.perform(delete("/api/addresses/1"))
                 .andExpect(status().isNoContent());
@@ -171,7 +185,7 @@ class AddressControllerTest {
 
     @Test
     void deleteAddress_notFound_returns404() throws Exception {
-        doThrow(new ResourceNotFoundException("Address", "id", 99L)).when(addressService).deleteAddress(99L);
+        doThrow(new ResourceNotFoundException("Address", "id", 99L)).when(addressService).deleteAddress(anyLong(), eq(99L));
 
         mockMvc.perform(delete("/api/addresses/99"))
                 .andExpect(status().isNotFound())

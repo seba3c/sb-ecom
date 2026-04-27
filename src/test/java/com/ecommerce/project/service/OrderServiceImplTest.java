@@ -43,6 +43,9 @@ class OrderServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
+    private CartService cartService;
+
+    @Mock
     private ModelMapper modelMapper;
 
     @InjectMocks
@@ -113,7 +116,6 @@ class OrderServiceImplTest {
         mockResponse.setTotalAmount(BigDecimal.valueOf(1999.98));
 
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
-        when(cartRepository.save(cart)).thenReturn(cart);
         when(modelMapper.map(any(Order.class), eq(OrderDetailResponse.class))).thenReturn(mockResponse);
 
         OrderDetailResponse result = orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK");
@@ -124,9 +126,7 @@ class OrderServiceImplTest {
         assertEquals(OrderStatus.PENDING, result.getStatus());
         assertEquals(1L, result.getShippingAddress());
         verify(orderRepository).save(any(Order.class));
-        verify(cartRepository).save(cart);
-        assertTrue(cart.getCartItems().isEmpty());
-        assertEquals(BigDecimal.ZERO, cart.getTotalPrice());
+        verify(cartService).clearCart(1L);
         assertEquals(8, product.getQuantity());
     }
 
@@ -200,12 +200,12 @@ class OrderServiceImplTest {
         savedOrder.setPayment(savedPayment);
 
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
-        when(cartRepository.save(cart)).thenReturn(cart);
         when(modelMapper.map(any(Order.class), eq(OrderDetailResponse.class))).thenReturn(new OrderDetailResponse());
 
         orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK");
 
         assertEquals(initialStock - orderedQty, product.getQuantity());
         verify(productRepository).save(product);
+        verify(cartService).clearCart(1L);
     }
 }

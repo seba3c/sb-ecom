@@ -4,6 +4,7 @@ import com.ecommerce.project.config.AppConfig;
 import com.ecommerce.project.dto.CartDetailResponse;
 import com.ecommerce.project.dto.CartListResponse;
 import com.ecommerce.project.service.CartService;
+import com.ecommerce.project.util.AuthUtils;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,28 +20,35 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private AuthUtils authUtils;
+
     @PostMapping("/my_cart/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDetailResponse> addProductToCart(
             @PathVariable Long productId,
             @PathVariable @Min(1) Integer quantity) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addProductToCart(productId, quantity));
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addProductToCart(userId, productId, quantity));
     }
 
     @PutMapping("/my_cart/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDetailResponse> updateProductQuantity(
             @PathVariable Long productId,
             @PathVariable @Min(1) Integer quantity) {
-        return ResponseEntity.ok(cartService.updateProductQuantity(productId, quantity));
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.ok(cartService.updateProductQuantity(userId, productId, quantity));
     }
 
     @DeleteMapping("/my_cart/{productId}")
     public ResponseEntity<CartDetailResponse> removeProductFromCart(@PathVariable Long productId) {
-        return ResponseEntity.ok(cartService.removeProductFromCart(productId));
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.ok(cartService.removeProductFromCart(userId, productId));
     }
 
     @GetMapping("/my_cart")
     public ResponseEntity<CartDetailResponse> getCart() {
-        return ResponseEntity.ok(cartService.getCart());
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.ok(cartService.getCart(userId));
     }
 
     @GetMapping("/admin/carts")

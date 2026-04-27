@@ -8,7 +8,7 @@ import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.AddressRepository;
-import com.ecommerce.project.util.AuthUtils;
+import com.ecommerce.project.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,15 @@ public class AddressServiceImpl implements AddressService {
     private AddressRepository addressRepository;
 
     @Autowired
-    private AuthUtils authUtils;
+    private UserRepository userRepository;
 
     @Autowired
     private ModelMapper modelMapper;
 
     @Override
-    public AddressListResponse getAllAddresses() {
-        User user = authUtils.loggedInUser();
+    public AddressListResponse getAllAddresses(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         List<Address> addresses = addressRepository.findByUser(user);
         List<AddressDetailResponse> responses = addresses.stream()
                 .map(address -> modelMapper.map(address, AddressDetailResponse.class))
@@ -40,16 +41,18 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDetailResponse getAddressById(Long id) {
-        User user = authUtils.loggedInUser();
+    public AddressDetailResponse getAddressById(Long userId, Long id) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
         return modelMapper.map(address, AddressDetailResponse.class);
     }
 
     @Override
-    public AddressDetailResponse createAddress(AddressCreateRequest request) {
-        User user = authUtils.loggedInUser();
+    public AddressDetailResponse createAddress(Long userId, AddressCreateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         Address address = modelMapper.map(request, Address.class);
         address.setUser(user);
         Address savedAddress = addressRepository.save(address);
@@ -57,8 +60,9 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDetailResponse updateAddress(Long id, AddressUpdateRequest request) {
-        User user = authUtils.loggedInUser();
+    public AddressDetailResponse updateAddress(Long userId, Long id, AddressUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
 
@@ -73,8 +77,9 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public void deleteAddress(Long id) {
-        User user = authUtils.loggedInUser();
+    public void deleteAddress(Long userId, Long id) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
         addressRepository.delete(address);

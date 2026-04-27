@@ -7,13 +7,13 @@ import com.ecommerce.project.dto.AddressUpdateRequest;
 
 public interface AddressService {
 
-    AddressListResponse getAllAddresses();
+    AddressListResponse getAllAddresses(Long userId);
 
-    AddressDetailResponse getAddressById(Long id);
+    AddressDetailResponse getAddressById(Long userId, Long id);
 
-    AddressDetailResponse createAddress(AddressCreateRequest request);
+    AddressDetailResponse createAddress(Long userId, AddressCreateRequest request);
 
-    AddressDetailResponse updateAddress(Long id, AddressUpdateRequest request);
+    AddressDetailResponse updateAddress(Long userId, Long id, AddressUpdateRequest request);
 
-    void deleteAddress(Long id);
+    void deleteAddress(Long userId, Long id);
 }
