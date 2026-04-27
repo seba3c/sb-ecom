@@ -15,7 +15,7 @@ Spring Boot 4.0 REST API (Java 21) with **layer-based packaging**:
 
 ```
 src/main/java/com/ecommerce/project/
-├── model/          # JPA entities (Product, Category, Cart, CartItem, Address, User, Role)
+├── model/          # JPA entities (Product, Category, Cart, CartItem, Address, Order, OrderItem, OrderStatus, Payment, User, Role)
 │   └── Auditable   # @MappedSuperclass with createdAt/updatedAt/createdBy/updatedBy
 ├── dto/            # Request/Response DTOs (<Entity><Action>Request/Response convention)
 ├── repository/     # Spring Data JPA repositories
@@ -76,6 +76,7 @@ src/main/java/com/ecommerce/project/
 | PUT | `/api/my_cart/{productId}/quantity/{quantity}` | authenticated |
 | DELETE | `/api/my_cart/{productId}` | authenticated |
 | GET | `/api/admin/carts` | ROLE_ADMIN |
+| POST | `/api/orders` | authenticated |
 
 ## Git Branch Naming
 
