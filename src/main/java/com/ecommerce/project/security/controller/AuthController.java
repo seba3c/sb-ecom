@@ -66,19 +66,20 @@ public class AuthController {
         UserDetailsImpl userDetails = Objects.requireNonNull(
                 (UserDetailsImpl) authentication.getPrincipal());
 
-        UserInfoResponse response = getUserInfoResponse(userDetails);
-
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+        UserInfoResponse response = getUserInfoResponse(userDetails, jwtCookie.toString());
+
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
     }
 
-    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails) {
+    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails, String jwtToken) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles);
+        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles, jwtToken);
     }
 
     @PostMapping("/signup")
@@ -143,7 +144,7 @@ public class AuthController {
         if (authentication != null) {
             UserDetailsImpl userDetails = Objects.requireNonNull(
                     (UserDetailsImpl) authentication.getPrincipal());
-            UserInfoResponse response = getUserInfoResponse(userDetails);
+            UserInfoResponse response = getUserInfoResponse(userDetails, null);
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.ok(new MessageResponse("No user details found"));
