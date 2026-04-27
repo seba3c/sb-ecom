@@ -124,7 +124,7 @@ class OrderServiceImplTest {
         assertEquals(1L, result.getId());
         assertEquals("test@example.com", result.getEmail());
         assertEquals(OrderStatus.PENDING, result.getStatus());
-        assertEquals(1L, result.getShippingAddress());
+        assertEquals(1L, result.getShippingAddressId());
         verify(orderRepository).save(any(Order.class));
         verify(cartService).clearCart(1L);
         assertEquals(8, product.getQuantity());

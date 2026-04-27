@@ -1,6 +1,5 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.dto.OrderCreateRequest;
 import com.ecommerce.project.dto.OrderDetailResponse;
 import com.ecommerce.project.dto.OrderItemDetail;
 import com.ecommerce.project.dto.PaymentDetail;
@@ -64,7 +63,7 @@ class OrderControllerTest {
         response.setOrderDate(LocalDateTime.of(2026, 4, 27, 10, 0));
         response.setTotalAmount(BigDecimal.valueOf(1999.98));
         response.setStatus(OrderStatus.PENDING);
-        response.setShippingAddress(1L);
+        response.setShippingAddressId(1L);
         response.setPayment(payment);
         return response;
     }

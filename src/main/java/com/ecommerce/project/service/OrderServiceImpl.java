@@ -104,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderDetailResponse toOrderDetailResponse(Order order) {
         OrderDetailResponse response = modelMapper.map(order, OrderDetailResponse.class);
         response.setEmail(order.getUser().getEmail());
-        response.setShippingAddress(order.getShippingAddress().getId());
+        response.setShippingAddressId(order.getShippingAddress().getId());
         return response;
     }
 }

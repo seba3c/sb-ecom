@@ -31,8 +31,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressListResponse getAllAddresses(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = fetchUser(userId);
         List<Address> addresses = addressRepository.findByUser(user);
         List<AddressDetailResponse> responses = addresses.stream()
                 .map(address -> modelMapper.map(address, AddressDetailResponse.class))
@@ -42,8 +41,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDetailResponse getAddressById(Long userId, Long id) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = fetchUser(userId);
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
         return modelMapper.map(address, AddressDetailResponse.class);
@@ -51,8 +49,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDetailResponse createAddress(Long userId, AddressCreateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = fetchUser(userId);
         Address address = modelMapper.map(request, Address.class);
         address.setUser(user);
         Address savedAddress = addressRepository.save(address);
@@ -61,8 +58,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDetailResponse updateAddress(Long userId, Long id, AddressUpdateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = fetchUser(userId);
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
 
@@ -78,10 +74,14 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public void deleteAddress(Long userId, Long id) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        User user = fetchUser(userId);
         Address address = addressRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
         addressRepository.delete(address);
+    }
+
+    private User fetchUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
     }
 }
