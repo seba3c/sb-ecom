@@ -5,6 +5,7 @@ import com.ecommerce.project.dto.AddressListResponse;
 import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.service.AddressService;
+import com.ecommerce.project.util.AuthUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,29 +19,37 @@ public class AddressController {
     @Autowired
     private AddressService addressService;
 
+    @Autowired
+    private AuthUtils authUtils;
+
     @GetMapping
     public ResponseEntity<AddressListResponse> getAllAddresses() {
-        return ResponseEntity.ok(addressService.getAllAddresses());
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.ok(addressService.getAllAddresses(userId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AddressDetailResponse> getAddressById(@PathVariable Long id) {
-        return ResponseEntity.ok(addressService.getAddressById(id));
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.ok(addressService.getAddressById(userId, id));
     }
 
     @PostMapping
     public ResponseEntity<AddressDetailResponse> createAddress(@Valid @RequestBody AddressCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(request));
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(addressService.createAddress(userId, request));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AddressDetailResponse> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressUpdateRequest request) {
-        return ResponseEntity.ok(addressService.updateAddress(id, request));
+        Long userId = authUtils.loggedInUser().getId();
+        return ResponseEntity.ok(addressService.updateAddress(userId, id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
-        addressService.deleteAddress(id);
+        Long userId = authUtils.loggedInUser().getId();
+        addressService.deleteAddress(userId, id);
         return ResponseEntity.noContent().build();
     }
 }

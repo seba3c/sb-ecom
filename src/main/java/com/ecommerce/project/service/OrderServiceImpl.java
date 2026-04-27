@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -33,6 +32,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CartService cartService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -94,12 +96,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        new ArrayList<>(cart.getCartItems()).forEach(ci -> {
-            cart.getCartItems().remove(ci);
-            ci.setCart(null);
-        });
-        cart.setTotalPrice(BigDecimal.ZERO);
-        cartRepository.save(cart);
+        cartService.clearCart(userId);
 
         return toOrderDetailResponse(savedOrder);
     }
@@ -107,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderDetailResponse toOrderDetailResponse(Order order) {
         OrderDetailResponse response = modelMapper.map(order, OrderDetailResponse.class);
         response.setEmail(order.getUser().getEmail());
-        response.setShippingAddress(order.getShippingAddress().getId());
+        response.setShippingAddressId(order.getShippingAddress().getId());
         return response;
     }
 }

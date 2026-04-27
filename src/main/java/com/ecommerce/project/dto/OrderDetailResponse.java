@@ -21,6 +21,6 @@ public class OrderDetailResponse {
     private LocalDateTime orderDate;
     private BigDecimal totalAmount;
     private OrderStatus status;
-    private Long shippingAddress;
+    private Long shippingAddressId;
     private PaymentDetail payment;
 }

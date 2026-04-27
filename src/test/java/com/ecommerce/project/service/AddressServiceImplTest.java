@@ -8,7 +8,7 @@ import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.AddressRepository;
-import com.ecommerce.project.util.AuthUtils;
+import com.ecommerce.project.security.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ class AddressServiceImplTest {
     private AddressRepository addressRepository;
 
     @Mock
-    private AuthUtils authUtils;
+    private UserRepository userRepository;
 
     @Mock
     private ModelMapper modelMapper;
@@ -60,12 +60,12 @@ class AddressServiceImplTest {
         AddressDetailResponse dto1 = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
         AddressDetailResponse dto2 = new AddressDetailResponse(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
 
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByUser(user)).thenReturn(List.of(address1, address2));
         when(modelMapper.map(address1, AddressDetailResponse.class)).thenReturn(dto1);
         when(modelMapper.map(address2, AddressDetailResponse.class)).thenReturn(dto2);
 
-        AddressListResponse result = addressService.getAllAddresses();
+        AddressListResponse result = addressService.getAllAddresses(1L);
 
         assertEquals(2, result.getContent().size());
         assertEquals("123 Main St", result.getContent().get(0).getStreetLine1());
@@ -74,10 +74,10 @@ class AddressServiceImplTest {
     @Test
     void getAllAddresses_emptyList_returnsEmptyContent() {
         User user = new User();
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByUser(user)).thenReturn(List.of());
 
-        AddressListResponse result = addressService.getAllAddresses();
+        AddressListResponse result = addressService.getAllAddresses(1L);
 
         assertTrue(result.getContent().isEmpty());
     }
@@ -95,11 +95,11 @@ class AddressServiceImplTest {
         address.setZipCode("10001");
         AddressDetailResponse dto = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
 
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(address));
         when(modelMapper.map(address, AddressDetailResponse.class)).thenReturn(dto);
 
-        AddressDetailResponse result = addressService.getAddressById(1L);
+        AddressDetailResponse result = addressService.getAddressById(1L, 1L);
 
         assertEquals(1L, result.getId());
         assertEquals("123 Main St", result.getStreetLine1());
@@ -109,11 +109,11 @@ class AddressServiceImplTest {
     void getAddressById_notFound_throwsResourceNotFoundException() {
         User user = new User();
         user.setId(1L);
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> addressService.getAddressById(99L));
+                () -> addressService.getAddressById(1L, 99L));
     }
 
     @Test
@@ -136,12 +136,12 @@ class AddressServiceImplTest {
         savedAddress.setZipCode("10001");
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
 
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(modelMapper.map(request, Address.class)).thenReturn(mappedAddress);
         when(addressRepository.save(mappedAddress)).thenReturn(savedAddress);
         when(modelMapper.map(savedAddress, AddressDetailResponse.class)).thenReturn(resultDTO);
 
-        AddressDetailResponse result = addressService.createAddress(request);
+        AddressDetailResponse result = addressService.createAddress(1L, request);
 
         assertEquals(1L, result.getId());
         assertEquals("123 Main St", result.getStreetLine1());
@@ -158,12 +158,12 @@ class AddressServiceImplTest {
         existingAddress.setStreetLine1("123 Main St");
         AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
 
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(existingAddress));
         when(addressRepository.save(any(Address.class))).thenReturn(existingAddress);
         when(modelMapper.map(existingAddress, AddressDetailResponse.class)).thenReturn(resultDTO);
 
-        AddressDetailResponse result = addressService.updateAddress(1L, request);
+        AddressDetailResponse result = addressService.updateAddress(1L, 1L, request);
 
         assertEquals(1L, result.getId());
         assertEquals("Updated St", result.getStreetLine1());
@@ -181,11 +181,11 @@ class AddressServiceImplTest {
         User user = new User();
         user.setId(1L);
         AddressUpdateRequest request = new AddressUpdateRequest("Updated St", null, "Boston", "MA", "USA", "02101");
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> addressService.updateAddress(99L, request));
+                () -> addressService.updateAddress(1L, 99L, request));
     }
 
     @Test
@@ -196,10 +196,10 @@ class AddressServiceImplTest {
         address.setId(1L);
         address.setStreetLine1("123 Main St");
 
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(address));
 
-        addressService.deleteAddress(1L);
+        addressService.deleteAddress(1L, 1L);
 
         verify(addressRepository).delete(address);
     }
@@ -208,10 +208,10 @@ class AddressServiceImplTest {
     void deleteAddress_notFound_throwsResourceNotFoundException() {
         User user = new User();
         user.setId(1L);
-        when(authUtils.loggedInUser()).thenReturn(user);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> addressService.deleteAddress(99L));
+                () -> addressService.deleteAddress(1L, 99L));
     }
 }

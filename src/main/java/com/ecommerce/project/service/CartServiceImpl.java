@@ -12,18 +12,18 @@ import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.CartItemRepository;
 import com.ecommerce.project.repository.CartRepository;
 import com.ecommerce.project.repository.ProductRepository;
-import com.ecommerce.project.util.AuthUtils;
+import com.ecommerce.project.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,15 +40,15 @@ public class CartServiceImpl implements CartService {
     private ProductRepository productRepository;
 
     @Autowired
-    private AuthUtils authUtils;
+    private UserRepository userRepository;
 
     @Autowired
     private ModelMapper modelMapper;
 
     @Override
-    public CartDetailResponse addProductToCart(Long productId, Integer quantity) {
+    public CartDetailResponse addProductToCart(Long userId, Long productId, Integer quantity) {
 
-        Cart cart = fetchOrCreateCart();
+        Cart cart = fetchOrCreateCart(userId);
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
@@ -74,9 +74,9 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDetailResponse updateProductQuantity(Long productId, Integer quantity) {
+    public CartDetailResponse updateProductQuantity(Long userId, Long productId, Integer quantity) {
 
-        Cart cart = fetchCart();
+        Cart cart = fetchCart(userId);
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
@@ -94,9 +94,9 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDetailResponse removeProductFromCart(Long productId) {
+    public CartDetailResponse removeProductFromCart(Long userId, Long productId) {
 
-        Cart cart = fetchCart();
+        Cart cart = fetchCart(userId);
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
@@ -111,9 +111,20 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDetailResponse getCart() {
-        Cart cart = fetchOrCreateCart();
+    public CartDetailResponse getCart(Long userId) {
+        Cart cart = fetchOrCreateCart(userId);
         return toCartDetailResponse(cart);
+    }
+
+    @Override
+    public void clearCart(Long userId) {
+        Cart cart = fetchCart(userId);
+        new ArrayList<>(cart.getCartItems()).forEach(ci -> {
+            cart.getCartItems().remove(ci);
+            ci.setCart(null);
+        });
+        cart.setTotalPrice(BigDecimal.ZERO);
+        cartRepository.save(cart);
     }
 
     @Override
@@ -150,19 +161,19 @@ public class CartServiceImpl implements CartService {
         return response;
     }
 
-    private Cart fetchOrCreateCart() {
-        User user = authUtils.loggedInUser();
-        return cartRepository.findByUserId(user.getId())
+    private Cart fetchOrCreateCart(Long userId) {
+        return cartRepository.findByUserId(userId)
                 .orElseGet(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
                     Cart newCart = new Cart();
                     newCart.setUser(user);
                     return cartRepository.save(newCart);
                 });
     }
 
-    private Cart fetchCart() {
-        User user = authUtils.loggedInUser();
-        return cartRepository.findByUserId(user.getId())
+    private Cart fetchCart(Long userId) {
+        return cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new APIException("Cart not found"));
     }
 
