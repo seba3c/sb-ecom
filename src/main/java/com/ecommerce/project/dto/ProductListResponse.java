@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductListResponse {
-  private List<ProductDetailResponse> content;
-  private Integer pageNumber;
-  private Integer pageSize;
-  private Long totalElements;
-  private Integer totalPages;
-  private boolean lastPage;
+    private List<ProductDetailResponse> content;
+    private Integer pageNumber;
+    private Integer pageSize;
+    private Long totalElements;
+    private Integer totalPages;
+    private boolean lastPage;
 }

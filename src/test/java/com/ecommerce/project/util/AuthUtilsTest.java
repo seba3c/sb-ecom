@@ -21,41 +21,42 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 @ExtendWith(MockitoExtension.class)
 class AuthUtilsTest {
 
-  @Mock private UserRepository userRepository;
+    @Mock
+    private UserRepository userRepository;
 
-  @InjectMocks private AuthUtils authUtils;
+    @InjectMocks
+    private AuthUtils authUtils;
 
-  private User user;
+    private User user;
 
-  @BeforeEach
-  void setUp() {
-    user = new User("testuser", "test@example.com", "password");
-    user.setId(1L);
+    @BeforeEach
+    void setUp() {
+        user = new User("testuser", "test@example.com", "password");
+        user.setId(1L);
 
-    UsernamePasswordAuthenticationToken auth =
-        new UsernamePasswordAuthenticationToken("testuser", null, List.of());
-    SecurityContextHolder.getContext().setAuthentication(auth);
-  }
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("testuser", null, List.of());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 
-  @AfterEach
-  void tearDown() {
-    SecurityContextHolder.clearContext();
-  }
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
-  @Test
-  void loggedInUser_authenticatedUser_returnsUser() {
-    when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    @Test
+    void loggedInUser_authenticatedUser_returnsUser() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-    User result = authUtils.loggedInUser();
+        User result = authUtils.loggedInUser();
 
-    assertEquals("testuser", result.getUsername());
-    assertEquals("test@example.com", result.getEmail());
-  }
+        assertEquals("testuser", result.getUsername());
+        assertEquals("test@example.com", result.getEmail());
+    }
 
-  @Test
-  void loggedInUser_userNotFound_throwsUsernameNotFoundException() {
-    when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+    @Test
+    void loggedInUser_userNotFound_throwsUsernameNotFoundException() {
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
 
-    assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInUser());
-  }
+        assertThrows(UsernameNotFoundException.class, () -> authUtils.loggedInUser());
+    }
 }

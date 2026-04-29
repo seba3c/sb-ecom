@@ -13,26 +13,26 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = false)
 public class OrderItem extends Auditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "order_id")
-  @ToString.Exclude
-  private Order order;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    @ToString.Exclude
+    private Order order;
 
-  @ManyToOne
-  @JoinColumn(name = "product_id")
-  @ToString.Exclude
-  private Product product;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    @ToString.Exclude
+    private Product product;
 
-  @Min(1)
-  private Integer quantity;
+    @Min(1)
+    private Integer quantity;
 
-  @Column(precision = 12, scale = 2)
-  private BigDecimal price;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal price;
 
-  @Column(precision = 12, scale = 2)
-  private BigDecimal discount;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal discount;
 }

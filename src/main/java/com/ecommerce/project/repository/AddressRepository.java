@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
-  List<Address> findByUser(User user);
+    List<Address> findByUser(User user);
 
-  Optional<Address> findByIdAndUser(Long id, User user);
+    Optional<Address> findByIdAndUser(Long id, User user);
 }

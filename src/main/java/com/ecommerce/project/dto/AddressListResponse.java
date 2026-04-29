@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressListResponse {
-  private List<AddressDetailResponse> content;
+    private List<AddressDetailResponse> content;
 }

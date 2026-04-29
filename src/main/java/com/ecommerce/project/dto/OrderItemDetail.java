@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderItemDetail {
 
-  private Long id;
-  private Integer quantity;
-  private BigDecimal price;
-  private BigDecimal discount;
-  private ProductDetailResponse product;
+    private Long id;
+    private Integer quantity;
+    private BigDecimal price;
+    private BigDecimal discount;
+    private ProductDetailResponse product;
 }

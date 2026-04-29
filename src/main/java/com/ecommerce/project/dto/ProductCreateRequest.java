@@ -15,22 +15,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductCreateRequest {
 
-  @NotBlank(message = "Product name must not be blank")
-  @Size(min = 5, message = "Product name must have at least 5 characters")
-  private String name;
+    @NotBlank(message = "Product name must not be blank")
+    @Size(min = 5, message = "Product name must have at least 5 characters")
+    private String name;
 
-  @NotBlank(message = "Product description must not be blank")
-  private String description;
+    @NotBlank(message = "Product description must not be blank")
+    private String description;
 
-  @NotNull
-  @Min(0)
-  private Integer quantity;
+    @NotNull
+    @Min(0)
+    private Integer quantity;
 
-  @NotNull
-  @DecimalMin("0.0")
-  private BigDecimal price;
+    @NotNull
+    @DecimalMin("0.0")
+    private BigDecimal price;
 
-  @NotNull
-  @DecimalMin("0.0")
-  private BigDecimal discount;
+    @NotNull
+    @DecimalMin("0.0")
+    private BigDecimal discount;
 }

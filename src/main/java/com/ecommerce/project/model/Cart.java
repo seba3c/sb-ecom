@@ -14,19 +14,19 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = false)
 public class Cart extends Auditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(precision = 12, scale = 2)
-  private BigDecimal totalPrice = BigDecimal.ZERO;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 
-  @OneToOne
-  @JoinColumn(name = "user_id")
-  @ToString.Exclude
-  private User user;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    private User user;
 
-  @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-  @ToString.Exclude
-  private List<CartItem> cartItems = new ArrayList<>();
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<CartItem> cartItems = new ArrayList<>();
 }

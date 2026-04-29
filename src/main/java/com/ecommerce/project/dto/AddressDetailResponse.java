@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressDetailResponse {
-  private Long id;
-  private String streetLine1;
-  private String streetLine2;
-  private String city;
-  private String state;
-  private String country;
-  private String zipCode;
+    private Long id;
+    private String streetLine1;
+    private String streetLine2;
+    private String city;
+    private String state;
+    private String country;
+    private String zipCode;
 }

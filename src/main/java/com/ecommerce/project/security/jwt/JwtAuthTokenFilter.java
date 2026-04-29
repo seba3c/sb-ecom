@@ -21,49 +21,48 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthTokenFilter extends OncePerRequestFilter {
-  @Autowired private JwtUtils jwtUtils;
+    @Autowired
+    private JwtUtils jwtUtils;
 
-  @Autowired private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
-  private static final Logger logger = LoggerFactory.getLogger(JwtAuthTokenFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthTokenFilter.class);
 
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request,
-      @NonNull HttpServletResponse response,
-      @NonNull FilterChain filterChain)
-      throws ServletException, IOException {
-    logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
-    try {
-      String jwt = parseJwt(request);
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-        String username = jwtUtils.getUserNameFromJwtToken(jwt);
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
+        logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
+        try {
+            String jwt = parseJwt(request);
+            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+                String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        logger.debug("Roles from JWT: {}", userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                logger.debug("Roles from JWT: {}", userDetails.getAuthorities());
 
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      }
-    } catch (JwtException e) {
-      logger.error("Invalid JWT token: {}", e.getMessage());
-    } catch (UsernameNotFoundException e) {
-      logger.error("User not found: {}", e.getMessage());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        } catch (JwtException e) {
+            logger.error("Invalid JWT token: {}", e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            logger.error("User not found: {}", e.getMessage());
+        }
+
+        filterChain.doFilter(request, response);
     }
 
-    filterChain.doFilter(request, response);
-  }
-
-  private String parseJwt(HttpServletRequest request) {
-    String jwtFromCookie = jwtUtils.getJwtFromCookie(request);
-    if (jwtFromCookie != null) {
-      return jwtFromCookie;
+    private String parseJwt(HttpServletRequest request) {
+        String jwtFromCookie = jwtUtils.getJwtFromCookie(request);
+        if (jwtFromCookie != null) {
+            return jwtFromCookie;
+        }
+        return jwtUtils.getJwtFromHeader(request);
     }
-    return jwtUtils.getJwtFromHeader(request);
-  }
 }

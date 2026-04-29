@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserInfoResponse {
-  private Long id;
-  private String username;
-  private List<String> roles;
-  private String jwtToken;
+    private Long id;
+    private String username;
+    private List<String> roles;
+    private String jwtToken;
 }

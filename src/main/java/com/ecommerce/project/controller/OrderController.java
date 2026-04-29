@@ -17,23 +17,23 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = SwaggerConfig.Tags.Order.NAME, description = SwaggerConfig.Tags.Order.DESCRIPTION)
 public class OrderController {
 
-  @Autowired private OrderService orderService;
+    @Autowired
+    private OrderService orderService;
 
-  @Autowired private AuthUtils authUtils;
+    @Autowired
+    private AuthUtils authUtils;
 
-  @PostMapping
-  public ResponseEntity<OrderDetailResponse> placeOrder(
-      @Valid @RequestBody OrderCreateRequest request) {
-    Long userId = authUtils.loggedInUser().getId();
-    OrderDetailResponse response =
-        orderService.placeOrder(
-            userId,
-            request.getAddressId(),
-            request.getPaymentMethod(),
-            request.getPgName(),
-            request.getPgPaymentId(),
-            request.getPgStatus(),
-            request.getPgResponse());
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
-  }
+    @PostMapping
+    public ResponseEntity<OrderDetailResponse> placeOrder(@Valid @RequestBody OrderCreateRequest request) {
+        Long userId = authUtils.loggedInUser().getId();
+        OrderDetailResponse response = orderService.placeOrder(
+                userId,
+                request.getAddressId(),
+                request.getPaymentMethod(),
+                request.getPgName(),
+                request.getPgPaymentId(),
+                request.getPgStatus(),
+                request.getPgResponse());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }

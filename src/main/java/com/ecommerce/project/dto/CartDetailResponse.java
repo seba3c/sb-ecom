@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartDetailResponse {
-  private Long id;
-  private BigDecimal totalPrice;
-  private List<CartItemDetail> cartItems = new ArrayList<>();
+    private Long id;
+    private BigDecimal totalPrice;
+    private List<CartItemDetail> cartItems = new ArrayList<>();
 }

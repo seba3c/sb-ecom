@@ -18,86 +18,93 @@ import org.springframework.security.core.userdetails.UserDetails;
 @ExtendWith(MockitoExtension.class)
 class JwtUtilsTest {
 
-  @Mock private JwtParser jwtParser;
+    @Mock
+    private JwtParser jwtParser;
 
-  @Mock private JwtValidator jwtValidator;
+    @Mock
+    private JwtValidator jwtValidator;
 
-  @Mock private JwtGenerator jwtGenerator;
+    @Mock
+    private JwtGenerator jwtGenerator;
 
-  @Mock private HttpServletRequest request;
+    @Mock
+    private HttpServletRequest request;
 
-  @InjectMocks private JwtUtils jwtUtils;
+    @InjectMocks
+    private JwtUtils jwtUtils;
 
-  @Test
-  void getJwtFromHeader_delegatesToJwtParser() {
-    when(jwtParser.getJwtFromHeader(request)).thenReturn("sometoken");
+    @Test
+    void getJwtFromHeader_delegatesToJwtParser() {
+        when(jwtParser.getJwtFromHeader(request)).thenReturn("sometoken");
 
-    String result = jwtUtils.getJwtFromHeader(request);
+        String result = jwtUtils.getJwtFromHeader(request);
 
-    assertEquals("sometoken", result);
-    verify(jwtParser).getJwtFromHeader(request);
-  }
+        assertEquals("sometoken", result);
+        verify(jwtParser).getJwtFromHeader(request);
+    }
 
-  @Test
-  void getUserNameFromJwtToken_delegatesToJwtParser() {
-    when(jwtParser.getUserNameFromJwtToken("token")).thenReturn("alice");
+    @Test
+    void getUserNameFromJwtToken_delegatesToJwtParser() {
+        when(jwtParser.getUserNameFromJwtToken("token")).thenReturn("alice");
 
-    String result = jwtUtils.getUserNameFromJwtToken("token");
+        String result = jwtUtils.getUserNameFromJwtToken("token");
 
-    assertEquals("alice", result);
-    verify(jwtParser).getUserNameFromJwtToken("token");
-  }
+        assertEquals("alice", result);
+        verify(jwtParser).getUserNameFromJwtToken("token");
+    }
 
-  @Test
-  void validateJwtToken_delegatesToJwtValidator() {
-    when(jwtValidator.validateJwtToken("token")).thenReturn(true);
+    @Test
+    void validateJwtToken_delegatesToJwtValidator() {
+        when(jwtValidator.validateJwtToken("token")).thenReturn(true);
 
-    boolean result = jwtUtils.validateJwtToken("token");
+        boolean result = jwtUtils.validateJwtToken("token");
 
-    assertTrue(result);
-    verify(jwtValidator).validateJwtToken("token");
-  }
+        assertTrue(result);
+        verify(jwtValidator).validateJwtToken("token");
+    }
 
-  @Test
-  void generateTokenFromUsername_delegatesToJwtGenerator() {
-    when(jwtGenerator.generateTokenFromUsername("bob")).thenReturn("generated-token");
+    @Test
+    void generateTokenFromUsername_delegatesToJwtGenerator() {
+        when(jwtGenerator.generateTokenFromUsername("bob")).thenReturn("generated-token");
 
-    String result = jwtUtils.generateTokenFromUsername("bob");
+        String result = jwtUtils.generateTokenFromUsername("bob");
 
-    assertEquals("generated-token", result);
-    verify(jwtGenerator).generateTokenFromUsername("bob");
-  }
+        assertEquals("generated-token", result);
+        verify(jwtGenerator).generateTokenFromUsername("bob");
+    }
 
-  @Test
-  void getJwtFromCookie_delegatesToJwtParser() {
-    when(jwtParser.getJwtFromCookie(request)).thenReturn("cookie-token");
+    @Test
+    void getJwtFromCookie_delegatesToJwtParser() {
+        when(jwtParser.getJwtFromCookie(request)).thenReturn("cookie-token");
 
-    String result = jwtUtils.getJwtFromCookie(request);
+        String result = jwtUtils.getJwtFromCookie(request);
 
-    assertEquals("cookie-token", result);
-    verify(jwtParser).getJwtFromCookie(request);
-  }
+        assertEquals("cookie-token", result);
+        verify(jwtParser).getJwtFromCookie(request);
+    }
 
-  @Test
-  void generateJwtCookie_delegatesToJwtGenerator() {
-    UserDetails userDetails = new User("bob", "pass", Collections.emptyList());
-    ResponseCookie cookie = ResponseCookie.from("ecommerce-app", "jwt-value").build();
-    when(jwtGenerator.generateJwtCookie(userDetails)).thenReturn(cookie);
+    @Test
+    void generateJwtCookie_delegatesToJwtGenerator() {
+        UserDetails userDetails = new User("bob", "pass", Collections.emptyList());
+        ResponseCookie cookie =
+                ResponseCookie.from("ecommerce-app", "jwt-value").build();
+        when(jwtGenerator.generateJwtCookie(userDetails)).thenReturn(cookie);
 
-    ResponseCookie result = jwtUtils.generateJwtCookie(userDetails);
+        ResponseCookie result = jwtUtils.generateJwtCookie(userDetails);
 
-    assertEquals(cookie, result);
-    verify(jwtGenerator).generateJwtCookie(userDetails);
-  }
+        assertEquals(cookie, result);
+        verify(jwtGenerator).generateJwtCookie(userDetails);
+    }
 
-  @Test
-  void generateJwtCleanCookie_delegatesToJwtGenerator() {
-    ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null).path("/api").build();
-    when(jwtGenerator.generateJwtCleanCookie()).thenReturn(cleanCookie);
+    @Test
+    void generateJwtCleanCookie_delegatesToJwtGenerator() {
+        ResponseCookie cleanCookie =
+                ResponseCookie.from("ecommerce-app", null).path("/api").build();
+        when(jwtGenerator.generateJwtCleanCookie()).thenReturn(cleanCookie);
 
-    ResponseCookie result = jwtUtils.generateJwtCleanCookie();
+        ResponseCookie result = jwtUtils.generateJwtCleanCookie();
 
-    assertEquals(cleanCookie, result);
-    verify(jwtGenerator).generateJwtCleanCookie();
-  }
+        assertEquals(cleanCookie, result);
+        verify(jwtGenerator).generateJwtCleanCookie();
+    }
 }

@@ -16,11 +16,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class Category extends Auditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @NotBlank(message = "Category name must not be blank")
-  @Size(min = 5, message = "Category name must have at least 5 characters")
-  private String name;
+    @NotBlank(message = "Category name must not be blank")
+    @Size(min = 5, message = "Category name must have at least 5 characters")
+    private String name;
 }

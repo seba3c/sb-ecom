@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Profile;
 @Profile({"default", "h2"})
 public class H2ConsoleConfig {
 
-  @Bean
-  public ServletRegistrationBean<JakartaWebServlet> h2ConsoleServlet() {
-    ServletRegistrationBean<JakartaWebServlet> bean =
-        new ServletRegistrationBean<>(new JakartaWebServlet(), "/h2-console/*");
-    bean.addInitParameter("webAllowOthers", "true");
-    return bean;
-  }
+    @Bean
+    public ServletRegistrationBean<JakartaWebServlet> h2ConsoleServlet() {
+        ServletRegistrationBean<JakartaWebServlet> bean =
+                new ServletRegistrationBean<>(new JakartaWebServlet(), "/h2-console/*");
+        bean.addInitParameter("webAllowOthers", "true");
+        return bean;
+    }
 }

@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderDetailResponse {
 
-  private Long id;
-  private String email;
-  private List<OrderItemDetail> items = new ArrayList<>();
-  private LocalDateTime orderDate;
-  private BigDecimal totalAmount;
-  private OrderStatus status;
-  private Long shippingAddressId;
-  private PaymentDetail payment;
+    private Long id;
+    private String email;
+    private List<OrderItemDetail> items = new ArrayList<>();
+    private LocalDateTime orderDate;
+    private BigDecimal totalAmount;
+    private OrderStatus status;
+    private Long shippingAddressId;
+    private PaymentDetail payment;
 }

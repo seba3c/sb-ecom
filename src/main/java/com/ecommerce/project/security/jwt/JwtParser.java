@@ -13,41 +13,41 @@ import org.springframework.web.util.WebUtils;
 
 @Component
 public class JwtParser {
-  private static final Logger logger = LoggerFactory.getLogger(JwtParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtParser.class);
 
-  @Value("${spring.app.jwtSecret}")
-  private String jwtSecret;
+    @Value("${spring.app.jwtSecret}")
+    private String jwtSecret;
 
-  @Value("${spring.app.jwtCookieName}")
-  private String jwtCookie;
+    @Value("${spring.app.jwtCookieName}")
+    private String jwtCookie;
 
-  public String getJwtFromHeader(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    logger.debug("Authorization Header: {}", bearerToken);
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7);
+    public String getJwtFromHeader(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        logger.debug("Authorization Header: {}", bearerToken);
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
-    return null;
-  }
 
-  public String getUserNameFromJwtToken(String token) {
-    return Jwts.parser()
-        .verifyWith(key())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .getSubject();
-  }
-
-  public String getJwtFromCookie(HttpServletRequest request) {
-    Cookie cookie = WebUtils.getCookie(request, jwtCookie);
-    if (cookie != null) {
-      return cookie.getValue();
+    public String getUserNameFromJwtToken(String token) {
+        return Jwts.parser()
+                .verifyWith(key())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
-    return null;
-  }
 
-  private SecretKey key() {
-    return Keys.hmacShaKeyFor(jwtSecret.getBytes());
-  }
+    public String getJwtFromCookie(HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, jwtCookie);
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+        return null;
+    }
+
+    private SecretKey key() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
 }

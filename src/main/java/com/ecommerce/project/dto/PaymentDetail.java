@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PaymentDetail {
 
-  private Long id;
-  private String method;
-  private String pgName;
-  private String pgPaymentId;
-  private String pgStatus;
-  private String pgResponse;
+    private Long id;
+    private String method;
+    private String pgName;
+    private String pgPaymentId;
+    private String pgStatus;
+    private String pgResponse;
 }

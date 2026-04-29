@@ -20,29 +20,30 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 @ExtendWith(MockitoExtension.class)
 class UserDetailsServiceImplTest {
 
-  @Mock private UserRepository userRepository;
+    @Mock
+    private UserRepository userRepository;
 
-  @InjectMocks private UserDetailsServiceImpl userDetailsService;
+    @InjectMocks
+    private UserDetailsServiceImpl userDetailsService;
 
-  @Test
-  void loadUserByUsername_existingUser_returnsUserDetails() {
-    User user = new User("alice", "alice@example.com", "encoded");
-    user.setId(1L);
-    user.setRoles(Set.of(new Role(AppRole.ROLE_USER)));
-    when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+    @Test
+    void loadUserByUsername_existingUser_returnsUserDetails() {
+        User user = new User("alice", "alice@example.com", "encoded");
+        user.setId(1L);
+        user.setRoles(Set.of(new Role(AppRole.ROLE_USER)));
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
 
-    UserDetails details = userDetailsService.loadUserByUsername("alice");
+        UserDetails details = userDetailsService.loadUserByUsername("alice");
 
-    assertEquals("alice", details.getUsername());
-    assertTrue(
-        details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
-  }
+        assertEquals("alice", details.getUsername());
+        assertTrue(
+                details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+    }
 
-  @Test
-  void loadUserByUsername_unknownUser_throwsUsernameNotFoundException() {
-    when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+    @Test
+    void loadUserByUsername_unknownUser_throwsUsernameNotFoundException() {
+        when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 
-    assertThrows(
-        UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("ghost"));
-  }
+        assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("ghost"));
+    }
 }

@@ -19,34 +19,34 @@ import lombok.ToString;
 @AllArgsConstructor
 public class Order extends Auditable {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  @ToString.Exclude
-  private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    private User user;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-  @ToString.Exclude
-  private List<OrderItem> items = new ArrayList<>();
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<OrderItem> items = new ArrayList<>();
 
-  private LocalDateTime orderDate;
+    private LocalDateTime orderDate;
 
-  @Column(precision = 12, scale = 2)
-  private BigDecimal totalAmount;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal totalAmount;
 
-  @Enumerated(EnumType.STRING)
-  private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
-  @ManyToOne
-  @JoinColumn(name = "address_id")
-  @ToString.Exclude
-  private Address shippingAddress;
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    @ToString.Exclude
+    private Address shippingAddress;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "payment_id")
-  @ToString.Exclude
-  private Payment payment;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "payment_id")
+    @ToString.Exclude
+    private Payment payment;
 }

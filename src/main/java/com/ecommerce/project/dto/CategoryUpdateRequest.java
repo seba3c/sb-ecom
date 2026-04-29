@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CategoryUpdateRequest {
 
-  @NotBlank(message = "Category name must not be blank")
-  @Size(min = 5, message = "Category name must have at least 5 characters")
-  private String name;
+    @NotBlank(message = "Category name must not be blank")
+    @Size(min = 5, message = "Category name must have at least 5 characters")
+    private String name;
 }

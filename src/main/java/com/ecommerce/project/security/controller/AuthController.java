@@ -35,141 +35,130 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = SwaggerConfig.Tags.Auth.NAME, description = SwaggerConfig.Tags.Auth.DESCRIPTION)
 public class AuthController {
 
-  @Autowired private JwtUtils jwtUtils;
+    @Autowired
+    private JwtUtils jwtUtils;
 
-  @Autowired private AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-  @Autowired private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired private RoleRepository roleRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
-  @Autowired private PasswordEncoder encoder;
+    @Autowired
+    private PasswordEncoder encoder;
 
-  @PostMapping("/signin")
-  public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-    Authentication authentication;
-    try {
-      authentication =
-          authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(
-                  loginRequest.getUsername(), loginRequest.getPassword()));
-    } catch (AuthenticationException exception) {
-      Map<String, Object> map = new HashMap<>();
-      map.put("message", "Bad credentials");
-      map.put("status", false);
-      return new ResponseEntity<Object>(map, HttpStatus.UNAUTHORIZED);
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        } catch (AuthenticationException exception) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("message", "Bad credentials");
+            map.put("status", false);
+            return new ResponseEntity<Object>(map, HttpStatus.UNAUTHORIZED);
+        }
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserDetailsImpl userDetails = Objects.requireNonNull((UserDetailsImpl) authentication.getPrincipal());
+
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+        UserInfoResponse response = getUserInfoResponse(userDetails, jwtCookie.getValue());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(response);
     }
 
-    SecurityContextHolder.getContext().setAuthentication(authentication);
+    private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails, String jwtToken) {
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
 
-    UserDetailsImpl userDetails =
-        Objects.requireNonNull((UserDetailsImpl) authentication.getPrincipal());
-
-    ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
-
-    UserInfoResponse response = getUserInfoResponse(userDetails, jwtCookie.getValue());
-
-    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
-  }
-
-  private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails, String jwtToken) {
-    List<String> roles =
-        userDetails.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.toList());
-
-    return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles, jwtToken);
-  }
-
-  @PostMapping("/signup")
-  public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
-
-    if (userRepository.existsByUsername(signupRequest.getUsername())) {
-      return ResponseEntity.badRequest()
-          .body(new MessageResponse("Error: Username is already taken!"));
+        return new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), roles, jwtToken);
     }
 
-    if (userRepository.existsByEmail(signupRequest.getEmail())) {
-      return ResponseEntity.badRequest()
-          .body(new MessageResponse("Error: Email is already taken!"));
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+
+        if (userRepository.existsByUsername(signupRequest.getUsername())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already taken!"));
+        }
+
+        User user = new User(
+                signupRequest.getUsername(), signupRequest.getEmail(), encoder.encode(signupRequest.getPassword()));
+
+        user.setRoles(resolveRoles(signupRequest.getRoles()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    User user =
-        new User(
-            signupRequest.getUsername(),
-            signupRequest.getEmail(),
-            encoder.encode(signupRequest.getPassword()));
-
-    user.setRoles(resolveRoles(signupRequest.getRoles()));
-    userRepository.save(user);
-
-    return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-  }
-
-  private Set<Role> resolveRoles(Set<String> strRoles) {
-    Set<Role> roles = new HashSet<>();
-    if (strRoles == null) {
-      roles.add(
-          roleRepository
-              .findByName(AppRole.ROLE_USER)
-              .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-    } else {
-      strRoles.forEach(
-          role -> {
-            switch (role) {
-              case "admin" ->
-                  roles.add(
-                      roleRepository
-                          .findByName(AppRole.ROLE_ADMIN)
-                          .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-              case "seller" ->
-                  roles.add(
-                      roleRepository
-                          .findByName(AppRole.ROLE_SELLER)
-                          .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-              default ->
-                  roles.add(
-                      roleRepository
-                          .findByName(AppRole.ROLE_USER)
-                          .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-            }
-          });
+    private Set<Role> resolveRoles(Set<String> strRoles) {
+        Set<Role> roles = new HashSet<>();
+        if (strRoles == null) {
+            roles.add(roleRepository
+                    .findByName(AppRole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    case "admin" -> roles.add(roleRepository
+                            .findByName(AppRole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+                    case "seller" -> roles.add(roleRepository
+                            .findByName(AppRole.ROLE_SELLER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+                    default -> roles.add(roleRepository
+                            .findByName(AppRole.ROLE_USER)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+                }
+            });
+        }
+        return roles;
     }
-    return roles;
-  }
 
-  @GetMapping("/username")
-  public String currentUsername() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication != null) {
-      return authentication.getName();
+    @GetMapping("/username")
+    public String currentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName();
+        }
+        return "";
     }
-    return "";
-  }
 
-  @GetMapping("/user")
-  public ResponseEntity<?> currentUserDetails() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication != null) {
-      UserDetailsImpl userDetails =
-          Objects.requireNonNull((UserDetailsImpl) authentication.getPrincipal());
-      UserInfoResponse response = getUserInfoResponse(userDetails, null);
-      return ResponseEntity.ok(response);
+    @GetMapping("/user")
+    public ResponseEntity<?> currentUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            UserDetailsImpl userDetails = Objects.requireNonNull((UserDetailsImpl) authentication.getPrincipal());
+            UserInfoResponse response = getUserInfoResponse(userDetails, null);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.ok(new MessageResponse("No user details found"));
     }
-    return ResponseEntity.ok(new MessageResponse("No user details found"));
-  }
 
-  @PostMapping("/signout")
-  public ResponseEntity<?> signOut() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null
-        || !authentication.isAuthenticated()
-        || "anonymousUser".equals(authentication.getPrincipal())) {
-      return ResponseEntity.badRequest().body(new MessageResponse("No user signed in"));
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOut() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("No user signed in"));
+        }
+        ResponseCookie jwtCookie = jwtUtils.generateJwtCleanCookie();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(new MessageResponse("User signed out successfully!"));
     }
-    ResponseCookie jwtCookie = jwtUtils.generateJwtCleanCookie();
-    return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-        .body(new MessageResponse("User signed out successfully!"));
-  }
 }

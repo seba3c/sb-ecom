@@ -16,14 +16,14 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "spring.app")
 public class SeedUserProperties {
 
-  private List<SeedUser> seedUsers = new ArrayList<>();
+    private List<SeedUser> seedUsers = new ArrayList<>();
 
-  @Setter
-  @Getter
-  public static class SeedUser {
-    private String username;
-    private String email;
-    private String password;
-    private Set<AppRole> roles = new HashSet<>();
-  }
+    @Setter
+    @Getter
+    public static class SeedUser {
+        private String username;
+        private String email;
+        private String password;
+        private Set<AppRole> roles = new HashSet<>();
+    }
 }
