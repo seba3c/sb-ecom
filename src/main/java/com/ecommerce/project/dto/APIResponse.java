@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class APIResponse {
 
-    public String message;
-
+  public String message;
 }

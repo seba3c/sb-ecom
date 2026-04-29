@@ -1,14 +1,13 @@
 package com.ecommerce.project.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressListResponse {
-    private List<AddressDetailResponse> content;
+  private List<AddressDetailResponse> content;
 }

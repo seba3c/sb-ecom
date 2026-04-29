@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    Product findByName(String name);
+  Product findByName(String name);
 
-    Page<Product> findByCategory(Category category, Pageable pageable);
+  Page<Product> findByCategory(Category category, Pageable pageable);
 
-    Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable);
+  Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+      String name, String description, Pageable pageable);
 }

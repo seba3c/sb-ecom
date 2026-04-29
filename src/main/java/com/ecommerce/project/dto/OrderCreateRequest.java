@@ -12,19 +12,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderCreateRequest {
 
-    @NotNull
-    private Long addressId;
+  @NotNull private Long addressId;
 
-    @NotBlank
-    @Size(min = 4)
-    private String paymentMethod;
+  @NotBlank
+  @Size(min = 4)
+  private String paymentMethod;
 
-    @NotBlank
-    private String pgName;
+  @NotBlank private String pgName;
 
-    private String pgPaymentId;
+  private String pgPaymentId;
 
-    private String pgStatus;
+  private String pgStatus;
 
-    private String pgResponse;
+  private String pgResponse;
 }

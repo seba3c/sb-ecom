@@ -14,30 +14,31 @@ import lombok.ToString;
 @NoArgsConstructor
 public class Payment extends Auditable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Size(min = 4)
-    private String method;
+  @Size(min = 4)
+  private String method;
 
-    private String pgPaymentId;
+  private String pgPaymentId;
 
-    private String pgStatus;
+  private String pgStatus;
 
-    private String pgResponse;
+  private String pgResponse;
 
-    private String pgName;
+  private String pgName;
 
-    @OneToOne(mappedBy = "payment")
-    @ToString.Exclude
-    private Order order;
+  @OneToOne(mappedBy = "payment")
+  @ToString.Exclude
+  private Order order;
 
-    public Payment(String method, String pgName, String pgPaymentId, String pgStatus, String pgResponse) {
-        this.method = method;
-        this.pgName = pgName;
-        this.pgPaymentId = pgPaymentId;
-        this.pgStatus = pgStatus;
-        this.pgResponse = pgResponse;
-    }
+  public Payment(
+      String method, String pgName, String pgPaymentId, String pgStatus, String pgResponse) {
+    this.method = method;
+    this.pgName = pgName;
+    this.pgPaymentId = pgPaymentId;
+    this.pgStatus = pgStatus;
+    this.pgResponse = pgResponse;
+  }
 }

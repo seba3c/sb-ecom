@@ -11,13 +11,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthUtils {
 
-    @Autowired
-    UserRepository userRepository;
-    
-    public User loggedInUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findByUsername(authentication.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + authentication.getName()));
+  @Autowired UserRepository userRepository;
 
-    }
+  public User loggedInUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return userRepository
+        .findByUsername(authentication.getName())
+        .orElseThrow(
+            () ->
+                new UsernameNotFoundException(
+                    "User Not Found with username: " + authentication.getName()));
+  }
 }

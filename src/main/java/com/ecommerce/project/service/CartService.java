@@ -5,15 +5,16 @@ import com.ecommerce.project.dto.CartListResponse;
 
 public interface CartService {
 
-    CartDetailResponse addProductToCart(Long userId, Long productId, Integer quantity);
+  CartDetailResponse addProductToCart(Long userId, Long productId, Integer quantity);
 
-    CartDetailResponse updateProductQuantity(Long userId, Long productId, Integer quantity);
+  CartDetailResponse updateProductQuantity(Long userId, Long productId, Integer quantity);
 
-    CartDetailResponse removeProductFromCart(Long userId, Long productId);
+  CartDetailResponse removeProductFromCart(Long userId, Long productId);
 
-    CartDetailResponse getCart(Long userId);
+  CartDetailResponse getCart(Long userId);
 
-    void clearCart(Long userId);
+  void clearCart(Long userId);
 
-    CartListResponse getAllCarts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
+  CartListResponse getAllCarts(
+      Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 }
