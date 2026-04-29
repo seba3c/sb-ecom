@@ -4,19 +4,16 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import lombok.*;
 
 @Entity
-@Table(name = "users",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email")
-        })
+@Table(
+        name = "users",
+        uniqueConstraints = {@UniqueConstraint(columnNames = "username"), @UniqueConstraint(columnNames = "email")})
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
@@ -40,26 +37,31 @@ public class User extends Auditable {
     @Size(max = 120)
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER,
-            cascade = CascadeType.MERGE)
-    @JoinTable(name = "user_role",
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(
+            name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     @ToString.Exclude
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "seller",
+    @OneToMany(
+            mappedBy = "seller",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             orphanRemoval = true)
     @ToString.Exclude
     private List<Product> products = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user",
+    @OneToMany(
+            mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     private List<Address> addresses = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToOne(
+            mappedBy = "user",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            orphanRemoval = true)
     @ToString.Exclude
     private Cart cart;
 
@@ -68,5 +70,4 @@ public class User extends Auditable {
         this.email = email;
         this.password = password;
     }
-
 }

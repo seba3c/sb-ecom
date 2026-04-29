@@ -1,14 +1,22 @@
 package com.ecommerce.project.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
 import com.ecommerce.project.service.CategoryService;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -16,15 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
-
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CategoryController.class)
 class CategoryControllerTest {
@@ -46,10 +45,13 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_returns200WithCategories() throws Exception {
-        CategoryListResponse response = new CategoryListResponse(List.of(
-                new CategoryDetailResponse(1L, "Electronics"),
-                new CategoryDetailResponse(2L, "Clothing")
-        ), 0, 50, 2L, 1, true);
+        CategoryListResponse response = new CategoryListResponse(
+                List.of(new CategoryDetailResponse(1L, "Electronics"), new CategoryDetailResponse(2L, "Clothing")),
+                0,
+                50,
+                2L,
+                1,
+                true);
         when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(response);
 
         mockMvc.perform(get("/api/public/categories"))
@@ -62,7 +64,8 @@ class CategoryControllerTest {
 
     @Test
     void getAllCategories_empty_returns200() throws Exception {
-        when(categoryService.getAllCategories(any(), any(), any(), any())).thenReturn(new CategoryListResponse(List.of(), 0, 50, 0L, 0, true));
+        when(categoryService.getAllCategories(any(), any(), any(), any()))
+                .thenReturn(new CategoryListResponse(List.of(), 0, 50, 0L, 0, true));
 
         mockMvc.perform(get("/api/public/categories"))
                 .andExpect(status().isOk())
@@ -108,8 +111,7 @@ class CategoryControllerTest {
 
     @Test
     void deleteCategory_notFound_returns404() throws Exception {
-        when(categoryService.deleteCategory(99L))
-                .thenThrow(new ResourceNotFoundException("Category", "id", 99L));
+        when(categoryService.deleteCategory(99L)).thenThrow(new ResourceNotFoundException("Category", "id", 99L));
 
         mockMvc.perform(delete("/api/admin/categories/99"))
                 .andExpect(status().isNotFound())
@@ -119,7 +121,8 @@ class CategoryControllerTest {
     @Test
     void updateCategory_returns200() throws Exception {
         CategoryDetailResponse resultDTO = new CategoryDetailResponse(1L, "Updated");
-        when(categoryService.updateCategory(eq(1L), any(CategoryUpdateRequest.class))).thenReturn(resultDTO);
+        when(categoryService.updateCategory(eq(1L), any(CategoryUpdateRequest.class)))
+                .thenReturn(resultDTO);
 
         mockMvc.perform(put("/api/admin/categories/1")
                         .contentType(MediaType.APPLICATION_JSON)

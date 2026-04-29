@@ -1,5 +1,9 @@
 package com.ecommerce.project.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
@@ -8,6 +12,8 @@ import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.repository.CategoryRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,13 +23,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
@@ -104,8 +103,7 @@ class CategoryServiceImplTest {
         when(modelMapper.map(request, Category.class)).thenReturn(mappedCategory);
         when(categoryRepository.findByName("Electronics")).thenReturn(existingCategory);
 
-        APIException ex = assertThrows(APIException.class,
-                () -> categoryService.createCategory(request));
+        APIException ex = assertThrows(APIException.class, () -> categoryService.createCategory(request));
 
         assertTrue(ex.getMessage().contains("Electronics"));
         assertTrue(ex.getMessage().contains("already exists"));
@@ -132,8 +130,7 @@ class CategoryServiceImplTest {
     void deleteCategory_notFound_throwsResourceNotFoundException() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> categoryService.deleteCategory(99L));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.deleteCategory(99L));
 
         verify(categoryRepository, never()).deleteById(any());
     }
@@ -162,7 +159,8 @@ class CategoryServiceImplTest {
     void updateCategory_notFound_throwsResourceNotFoundException() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(
+                ResourceNotFoundException.class,
                 () -> categoryService.updateCategory(99L, new CategoryUpdateRequest("Name")));
 
         verify(categoryRepository, never()).save(any());

@@ -1,15 +1,14 @@
 package com.ecommerce.project.security.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.ecommerce.project.model.AppRole;
 import com.ecommerce.project.model.Role;
 import com.ecommerce.project.model.User;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class UserDetailsImplTest {
 
@@ -44,18 +43,14 @@ class UserDetailsImplTest {
 
     @Test
     void build_multipleRoles_createsAllAuthorities() {
-        user.setRoles(Set.of(
-                new Role(AppRole.ROLE_USER),
-                new Role(AppRole.ROLE_ADMIN),
-                new Role(AppRole.ROLE_SELLER)
-        ));
+        user.setRoles(Set.of(new Role(AppRole.ROLE_USER), new Role(AppRole.ROLE_ADMIN), new Role(AppRole.ROLE_SELLER)));
 
         UserDetailsImpl details = UserDetailsImpl.build(user);
 
         assertEquals(3, details.getAuthorities().size());
-        Set<String> authorityNames = Set.copyOf(
-                details.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()
-        );
+        Set<String> authorityNames = Set.copyOf(details.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
         assertTrue(authorityNames.contains("ROLE_USER"));
         assertTrue(authorityNames.contains("ROLE_ADMIN"));
         assertTrue(authorityNames.contains("ROLE_SELLER"));

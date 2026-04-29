@@ -7,12 +7,11 @@ import com.ecommerce.project.model.*;
 import com.ecommerce.project.repository.*;
 import com.ecommerce.project.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -47,19 +46,18 @@ public class OrderServiceImpl implements OrderService {
             String pgName,
             String pgPaymentId,
             String pgStatus,
-            String pgResponse
-    ) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+            String pgResponse) {
+        User user =
+                userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new APIException("Cart not found for user"));
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new APIException("Cart not found for user"));
 
         if (cart.getCartItems().isEmpty()) {
             throw new APIException("Cart is empty");
         }
 
-        Address address = addressRepository.findById(addressId)
+        Address address = addressRepository
+                .findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
 
         Payment payment = new Payment(paymentMethod, pgName, pgPaymentId, pgStatus, pgResponse);
@@ -89,8 +87,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         BigDecimal totalAmount = order.getItems().stream()
-                .map(i -> i.getPrice().subtract(i.getDiscount())
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
+                .map(i -> i.getPrice().subtract(i.getDiscount()).multiply(BigDecimal.valueOf(i.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.setTotalAmount(totalAmount);
 

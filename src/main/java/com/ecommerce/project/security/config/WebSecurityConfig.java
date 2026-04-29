@@ -8,6 +8,9 @@ import com.ecommerce.project.security.jwt.JwtAuthTokenFilter;
 import com.ecommerce.project.security.repository.RoleRepository;
 import com.ecommerce.project.security.repository.UserRepository;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -26,13 +29,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Configuration
 @EnableWebSecurity
-//@EnableMethodSecurity
+// @EnableMethodSecurity
 public class WebSecurityConfig {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -71,17 +70,24 @@ public class WebSecurityConfig {
         // Mark sessions as stateless
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         // By pass security API paths
-        http.authorizeHttpRequests(auth ->
-                auth.requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/test/**").permitAll()
-                        .requestMatchers("/images/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()  // temporal until DB is replaced
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-        );
+        http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**")
+                .permitAll()
+                .requestMatchers("/v3/api-docs/**")
+                .permitAll()
+                .requestMatchers("/swagger-ui/**")
+                .permitAll()
+                .requestMatchers("/api/test/**")
+                .permitAll()
+                .requestMatchers("/images/**")
+                .permitAll()
+                .requestMatchers("/h2-console/**")
+                .permitAll() // temporal until DB is replaced
+                .requestMatchers("/api/public/**")
+                .permitAll()
+                .requestMatchers("/api/admin/**")
+                .hasRole("ADMIN")
+                .anyRequest()
+                .authenticated());
         //
         http.authenticationProvider(authenticationProvider());
         // Allow H2 console frames (uses iframes internally)
@@ -93,57 +99,57 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web -> web.ignoring().requestMatchers("/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**"));
+        return (web -> web.ignoring()
+                .requestMatchers(
+                        "/v2/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**"));
     }
 
     @Bean
-    public CommandLineRunner initData(RoleRepository roleRepository, UserRepository userRepository,
-                                      PasswordEncoder passwordEncoder, SeedUserProperties seedUserProperties) {
+    public CommandLineRunner initData(
+            RoleRepository roleRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            SeedUserProperties seedUserProperties) {
         return args -> {
             // Retrieve or create roles
-            Role userRole = roleRepository.findByName(AppRole.ROLE_USER)
-                    .orElseGet(() -> {
-                        Role newUserRole = new Role(AppRole.ROLE_USER);
-                        return roleRepository.save(newUserRole);
-                    });
+            Role userRole = roleRepository.findByName(AppRole.ROLE_USER).orElseGet(() -> {
+                Role newUserRole = new Role(AppRole.ROLE_USER);
+                return roleRepository.save(newUserRole);
+            });
 
-            Role sellerRole = roleRepository.findByName(AppRole.ROLE_SELLER)
-                    .orElseGet(() -> {
-                        Role newSellerRole = new Role(AppRole.ROLE_SELLER);
-                        return roleRepository.save(newSellerRole);
-                    });
+            Role sellerRole = roleRepository.findByName(AppRole.ROLE_SELLER).orElseGet(() -> {
+                Role newSellerRole = new Role(AppRole.ROLE_SELLER);
+                return roleRepository.save(newSellerRole);
+            });
 
-            Role adminRole = roleRepository.findByName(AppRole.ROLE_ADMIN)
-                    .orElseGet(() -> {
-                        Role newAdminRole = new Role(AppRole.ROLE_ADMIN);
-                        return roleRepository.save(newAdminRole);
-                    });
+            Role adminRole = roleRepository.findByName(AppRole.ROLE_ADMIN).orElseGet(() -> {
+                Role newAdminRole = new Role(AppRole.ROLE_ADMIN);
+                return roleRepository.save(newAdminRole);
+            });
 
             Map<AppRole, Role> roleMap = Map.of(
                     AppRole.ROLE_USER, userRole,
                     AppRole.ROLE_SELLER, sellerRole,
-                    AppRole.ROLE_ADMIN, adminRole
-            );
+                    AppRole.ROLE_ADMIN, adminRole);
 
             // Create users if not already present, then assign roles
             for (SeedUserProperties.SeedUser seedUser : seedUserProperties.getSeedUsers()) {
-                User user = userRepository.findByUsername(seedUser.getUsername())
-                        .orElseGet(() -> new User(seedUser.getUsername(), seedUser.getEmail(),
-                                passwordEncoder.encode(seedUser.getPassword()))
-                        );
+                User user = userRepository
+                        .findByUsername(seedUser.getUsername())
+                        .orElseGet(() -> new User(
+                                seedUser.getUsername(),
+                                seedUser.getEmail(),
+                                passwordEncoder.encode(seedUser.getPassword())));
 
-                Set<Role> roles = seedUser.getRoles().stream()
-                        .map(roleMap::get)
-                        .collect(Collectors.toSet());
+                Set<Role> roles = seedUser.getRoles().stream().map(roleMap::get).collect(Collectors.toSet());
                 user.setRoles(roles);
                 userRepository.save(user);
             }
         };
     }
-
 }

@@ -1,23 +1,21 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryUpdateRequest;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.repository.CategoryRepository;
+import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -29,7 +27,8 @@ public class CategoryServiceImpl implements CategoryService {
     private ModelMapper modelMapper;
 
     @Override
-    public CategoryListResponse getAllCategories(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public CategoryListResponse getAllCategories(
+            Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -47,8 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryPage.getSize(),
                 categoryPage.getTotalElements(),
                 categoryPage.getTotalPages(),
-                categoryPage.isLast()
-        );
+                categoryPage.isLast());
     }
 
     @Override
@@ -63,19 +61,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDetailResponse deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+        Category category =
+                categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
         categoryRepository.deleteById(id);
         return modelMapper.map(category, CategoryDetailResponse.class);
     }
 
     @Override
     public CategoryDetailResponse updateCategory(Long id, CategoryUpdateRequest request) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+        Category category =
+                categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
 
         category.setName(request.getName());
-        
+
         return modelMapper.map(categoryRepository.save(category), CategoryDetailResponse.class);
     }
 }

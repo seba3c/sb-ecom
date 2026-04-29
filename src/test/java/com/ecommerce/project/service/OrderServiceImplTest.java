@@ -1,11 +1,20 @@
 package com.ecommerce.project.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.ecommerce.project.dto.OrderDetailResponse;
 import com.ecommerce.project.exception.APIException;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.*;
 import com.ecommerce.project.repository.*;
 import com.ecommerce.project.security.repository.UserRepository;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,16 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceImplTest {
@@ -135,7 +134,8 @@ class OrderServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.empty());
 
-        assertThrows(APIException.class,
+        assertThrows(
+                APIException.class,
                 () -> orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK"));
     }
 
@@ -145,7 +145,8 @@ class OrderServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
 
-        assertThrows(APIException.class,
+        assertThrows(
+                APIException.class,
                 () -> orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK"));
     }
 
@@ -155,7 +156,8 @@ class OrderServiceImplTest {
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(addressRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(
+                ResourceNotFoundException.class,
                 () -> orderService.placeOrder(1L, 99L, "card", "Stripe", "pi_123", "succeeded", "OK"));
     }
 
@@ -168,7 +170,8 @@ class OrderServiceImplTest {
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
 
-        assertThrows(APIException.class,
+        assertThrows(
+                APIException.class,
                 () -> orderService.placeOrder(1L, 1L, "card", "Stripe", "pi_123", "succeeded", "OK"));
     }
 

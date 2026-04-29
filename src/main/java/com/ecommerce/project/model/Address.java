@@ -46,5 +46,4 @@ public class Address extends Auditable {
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     private User user;
-
 }

@@ -1,6 +1,11 @@
 package com.ecommerce.project.security.jwt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
+
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,12 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JwtUtilsTest {
@@ -87,7 +86,8 @@ class JwtUtilsTest {
     @Test
     void generateJwtCookie_delegatesToJwtGenerator() {
         UserDetails userDetails = new User("bob", "pass", Collections.emptyList());
-        ResponseCookie cookie = ResponseCookie.from("ecommerce-app", "jwt-value").build();
+        ResponseCookie cookie =
+                ResponseCookie.from("ecommerce-app", "jwt-value").build();
         when(jwtGenerator.generateJwtCookie(userDetails)).thenReturn(cookie);
 
         ResponseCookie result = jwtUtils.generateJwtCookie(userDetails);
@@ -98,7 +98,8 @@ class JwtUtilsTest {
 
     @Test
     void generateJwtCleanCookie_delegatesToJwtGenerator() {
-        ResponseCookie cleanCookie = ResponseCookie.from("ecommerce-app", null).path("/api").build();
+        ResponseCookie cleanCookie =
+                ResponseCookie.from("ecommerce-app", null).path("/api").build();
         when(jwtGenerator.generateJwtCleanCookie()).thenReturn(cleanCookie);
 
         ResponseCookie result = jwtUtils.generateJwtCleanCookie();

@@ -10,6 +10,7 @@ import com.ecommerce.project.model.Category;
 import com.ecommerce.project.model.Product;
 import com.ecommerce.project.repository.CategoryRepository;
 import com.ecommerce.project.repository.ProductRepository;
+import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -34,7 +33,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailResponse createProduct(Long categoryId, ProductCreateRequest request) {
-        Category category = categoryRepository.findById(categoryId)
+        Category category = categoryRepository
+                .findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
 
         if (productRepository.findByName(request.getName()) != null) {
@@ -48,7 +48,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailResponse updateProduct(Long productId, ProductUpdateRequest request) {
-        Product existing = productRepository.findById(productId)
+        Product existing = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
         existing.setName(request.getName());
@@ -62,7 +63,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailResponse deleteProduct(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         productRepository.deleteById(productId);
         return modelMapper.map(product, ProductDetailResponse.class);
@@ -75,24 +77,28 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailResponse getProductById(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         return modelMapper.map(product, ProductDetailResponse.class);
     }
 
     @Override
-    public ProductListResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        Page<Product> page = productRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        keyword, keyword, toPageable(pageNumber, pageSize, sortBy, sortOrder));
+    public ProductListResponse getProductsByKeyword(
+            String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Page<Product> page = productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                keyword, keyword, toPageable(pageNumber, pageSize, sortBy, sortOrder));
         return toProductListResponse(page);
     }
 
     @Override
-    public ProductListResponse getProductsByCategory(Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        Category category = categoryRepository.findById(categoryId)
+    public ProductListResponse getProductsByCategory(
+            Long categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Category category = categoryRepository
+                .findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
-        Page<Product> page = productRepository.findByCategory(category, toPageable(pageNumber, pageSize, sortBy, sortOrder));
+        Page<Product> page =
+                productRepository.findByCategory(category, toPageable(pageNumber, pageSize, sortBy, sortOrder));
         return toProductListResponse(page);
     }
 
@@ -107,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductDetailResponse> dtos = page.getContent().stream()
                 .map(p -> modelMapper.map(p, ProductDetailResponse.class))
                 .toList();
-        return new ProductListResponse(dtos, page.getNumber(), page.getSize(),
-                page.getTotalElements(), page.getTotalPages(), page.isLast());
+        return new ProductListResponse(
+                dtos, page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 }

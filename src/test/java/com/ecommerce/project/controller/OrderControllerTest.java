@@ -1,5 +1,12 @@
 package com.ecommerce.project.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.ecommerce.project.dto.OrderDetailResponse;
 import com.ecommerce.project.dto.OrderItemDetail;
 import com.ecommerce.project.dto.PaymentDetail;
@@ -11,23 +18,15 @@ import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
 import com.ecommerce.project.service.OrderService;
 import com.ecommerce.project.util.AuthUtils;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
 class OrderControllerTest {
@@ -74,9 +73,11 @@ class OrderControllerTest {
         when(orderService.placeOrder(eq(1L), any(), any(), any(), any(), any(), any()))
                 .thenReturn(sampleOrderResponse());
 
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+        mockMvc.perform(
+                        post("/api/orders")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
                                 {
                                     "addressId": 1,
                                     "paymentMethod": "card",
@@ -96,9 +97,11 @@ class OrderControllerTest {
 
     @Test
     void placeOrder_invalidRequest_missingAddressId_returns400() throws Exception {
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+        mockMvc.perform(
+                        post("/api/orders")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
                                 {
                                     "paymentMethod": "card",
                                     "pgName": "Stripe"
@@ -109,9 +112,11 @@ class OrderControllerTest {
 
     @Test
     void placeOrder_invalidRequest_shortPaymentMethod_returns400() throws Exception {
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+        mockMvc.perform(
+                        post("/api/orders")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
                                 {
                                     "addressId": 1,
                                     "paymentMethod": "cc",
@@ -127,9 +132,11 @@ class OrderControllerTest {
         when(orderService.placeOrder(eq(1L), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new APIException("Cart is empty"));
 
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+        mockMvc.perform(
+                        post("/api/orders")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
                                 {
                                     "addressId": 1,
                                     "paymentMethod": "card",
@@ -145,9 +152,11 @@ class OrderControllerTest {
         when(orderService.placeOrder(eq(1L), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("Address", "id", 99L));
 
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+        mockMvc.perform(
+                        post("/api/orders")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        """
                                 {
                                     "addressId": 99,
                                     "paymentMethod": "card",

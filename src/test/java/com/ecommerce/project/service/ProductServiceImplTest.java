@@ -1,5 +1,10 @@
 package com.ecommerce.project.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
@@ -11,6 +16,9 @@ import com.ecommerce.project.model.Category;
 import com.ecommerce.project.model.Product;
 import com.ecommerce.project.repository.CategoryRepository;
 import com.ecommerce.project.repository.ProductRepository;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,15 +29,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
@@ -65,13 +64,20 @@ class ProductServiceImplTest {
         product.setDiscount(BigDecimal.valueOf(0.1));
         product.setCategory(category);
 
-        productDTO = new ProductDetailResponse(1L, "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1),
+        productDTO = new ProductDetailResponse(
+                1L,
+                "Laptop Pro",
+                "High performance laptop",
+                10,
+                BigDecimal.valueOf(999.99),
+                BigDecimal.valueOf(0.1),
                 new CategoryDetailResponse(1L, "Electronics"));
     }
 
     @Test
     void createProduct_success() {
-        ProductCreateRequest request = new ProductCreateRequest("Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1));
+        ProductCreateRequest request = new ProductCreateRequest(
+                "Laptop Pro", "High performance laptop", 10, BigDecimal.valueOf(999.99), BigDecimal.valueOf(0.1));
         Product mappedProduct = new Product();
         mappedProduct.setName("Laptop Pro");
 
@@ -92,19 +98,19 @@ class ProductServiceImplTest {
     void createProduct_categoryNotFound_throwsResourceNotFoundException() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> productService.createProduct(99L, new ProductCreateRequest()));
+        assertThrows(
+                ResourceNotFoundException.class, () -> productService.createProduct(99L, new ProductCreateRequest()));
     }
 
     @Test
     void createProduct_duplicateName_throwsAPIException() {
-        ProductCreateRequest request = new ProductCreateRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO);
+        ProductCreateRequest request =
+                new ProductCreateRequest("Laptop Pro", "desc", 0, BigDecimal.ZERO, BigDecimal.ZERO);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.findByName("Laptop Pro")).thenReturn(product);
 
-        APIException ex = assertThrows(APIException.class,
-                () -> productService.createProduct(1L, request));
+        APIException ex = assertThrows(APIException.class, () -> productService.createProduct(1L, request));
 
         assertTrue(ex.getMessage().contains("Laptop Pro"));
         verify(productRepository, never()).save(any());
@@ -112,7 +118,8 @@ class ProductServiceImplTest {
 
     @Test
     void updateProduct_success() {
-        ProductUpdateRequest request = new ProductUpdateRequest("Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05));
+        ProductUpdateRequest request = new ProductUpdateRequest(
+                "Laptop Pro X", "Updated desc", 5, BigDecimal.valueOf(1099.99), BigDecimal.valueOf(0.05));
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(product)).thenReturn(product);
@@ -133,8 +140,8 @@ class ProductServiceImplTest {
     void updateProduct_notFound_throwsResourceNotFoundException() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> productService.updateProduct(99L, new ProductUpdateRequest()));
+        assertThrows(
+                ResourceNotFoundException.class, () -> productService.updateProduct(99L, new ProductUpdateRequest()));
 
         verify(productRepository, never()).save(any());
     }
@@ -154,8 +161,7 @@ class ProductServiceImplTest {
     void deleteProduct_notFound_throwsResourceNotFoundException() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> productService.deleteProduct(99L));
+        assertThrows(ResourceNotFoundException.class, () -> productService.deleteProduct(99L));
 
         verify(productRepository, never()).deleteById(any());
     }
@@ -186,15 +192,15 @@ class ProductServiceImplTest {
     void getProductById_notFound_throwsResourceNotFoundException() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> productService.getProductById(99L));
+        assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(99L));
     }
 
     @Test
     void getProductsByKeyword_returnsMatchingProducts() {
         Page<Product> page = new PageImpl<>(List.of(product));
         when(productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                eq("laptop"), eq("laptop"), any(Pageable.class))).thenReturn(page);
+                        eq("laptop"), eq("laptop"), any(Pageable.class)))
+                .thenReturn(page);
         when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
         ProductListResponse response = productService.getProductsByKeyword("laptop", 0, 50, "id", "asc");
@@ -205,7 +211,8 @@ class ProductServiceImplTest {
     @Test
     void getProductsByKeyword_noMatches_returnsEmptyResponse() {
         when(productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                eq("xyz"), eq("xyz"), any(Pageable.class))).thenReturn(Page.empty());
+                        eq("xyz"), eq("xyz"), any(Pageable.class)))
+                .thenReturn(Page.empty());
 
         ProductListResponse response = productService.getProductsByKeyword("xyz", 0, 50, "id", "asc");
 
@@ -216,7 +223,8 @@ class ProductServiceImplTest {
     void getProductsByCategory_success() {
         Page<Product> page = new PageImpl<>(List.of(product));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(productRepository.findByCategory(eq(category), any(Pageable.class))).thenReturn(page);
+        when(productRepository.findByCategory(eq(category), any(Pageable.class)))
+                .thenReturn(page);
         when(modelMapper.map(product, ProductDetailResponse.class)).thenReturn(productDTO);
 
         ProductListResponse response = productService.getProductsByCategory(1L, 0, 50, "id", "asc");
@@ -228,7 +236,7 @@ class ProductServiceImplTest {
     void getProductsByCategory_categoryNotFound_throwsResourceNotFoundException() {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> productService.getProductsByCategory(99L, 0, 50, "id", "asc"));
+        assertThrows(
+                ResourceNotFoundException.class, () -> productService.getProductsByCategory(99L, 0, 50, "id", "asc"));
     }
 }

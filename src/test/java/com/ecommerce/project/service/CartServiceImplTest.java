@@ -1,5 +1,10 @@
 package com.ecommerce.project.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.ecommerce.project.dto.CartDetailResponse;
 import com.ecommerce.project.dto.CartItemDetail;
 import com.ecommerce.project.dto.CartListResponse;
@@ -14,6 +19,10 @@ import com.ecommerce.project.repository.CartItemRepository;
 import com.ecommerce.project.repository.CartRepository;
 import com.ecommerce.project.repository.ProductRepository;
 import com.ecommerce.project.security.repository.UserRepository;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,19 +30,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceImplTest {
@@ -90,7 +88,8 @@ class CartServiceImplTest {
         cartItem.setPrice(product.getPrice());
         cartItem.setDiscount(product.getDiscount());
 
-        productDTO = new ProductDetailResponse(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
+        productDTO = new ProductDetailResponse(
+                1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
 
         cartItemDTO = new CartItemDetail(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, productDTO);
 

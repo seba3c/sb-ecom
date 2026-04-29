@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
+    id("com.diffplug.spotless") version "7.0.2"
 }
 
 group = "com.ecommerce"
@@ -46,4 +47,23 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.register<Copy>("installGitHooks") {
+    from("scripts/hooks")
+    into(".git/hooks")
+    filePermissions { unix("rwxr-xr-x") }
+}
+
+tasks.named("build") {
+    dependsOn("installGitHooks")
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }

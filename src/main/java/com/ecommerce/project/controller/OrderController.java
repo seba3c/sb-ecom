@@ -5,11 +5,11 @@ import com.ecommerce.project.dto.OrderCreateRequest;
 import com.ecommerce.project.dto.OrderDetailResponse;
 import com.ecommerce.project.service.OrderService;
 import com.ecommerce.project.util.AuthUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,8 +33,7 @@ public class OrderController {
                 request.getPgName(),
                 request.getPgPaymentId(),
                 request.getPgStatus(),
-                request.getPgResponse()
-        );
+                request.getPgResponse());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

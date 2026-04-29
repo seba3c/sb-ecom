@@ -1,16 +1,16 @@
 package com.ecommerce.project.controller;
 
-import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.config.AppConfig;
+import com.ecommerce.project.config.SwaggerConfig;
 import com.ecommerce.project.dto.ProductCreateRequest;
 import com.ecommerce.project.dto.ProductDetailResponse;
 import com.ecommerce.project.dto.ProductListResponse;
 import com.ecommerce.project.dto.ProductUpdateRequest;
 import com.ecommerce.project.service.ProductService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,15 +24,13 @@ public class ProductController {
 
     @PostMapping("/admin/categories/{categoryId}/products")
     public ResponseEntity<ProductDetailResponse> createProduct(
-            @PathVariable Long categoryId,
-            @Valid @RequestBody ProductCreateRequest request) {
+            @PathVariable Long categoryId, @Valid @RequestBody ProductCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(categoryId, request));
     }
 
     @PutMapping("/admin/products/{productId}")
     public ResponseEntity<ProductDetailResponse> updateProduct(
-            @PathVariable Long productId,
-            @Valid @RequestBody ProductUpdateRequest request) {
+            @PathVariable Long productId, @Valid @RequestBody ProductUpdateRequest request) {
         return ResponseEntity.ok(productService.updateProduct(productId, request));
     }
 
@@ -72,6 +70,7 @@ public class ProductController {
             @RequestParam(defaultValue = AppConfig.Pagination.PAGE_SIZE, required = false) Integer pageSize,
             @RequestParam(defaultValue = AppConfig.Pagination.SORT_PRODUCTS_BY, required = false) String sortBy,
             @RequestParam(defaultValue = AppConfig.Pagination.SORT_PRODUCTS_DIR, required = false) String sortOrder) {
-        return ResponseEntity.ok(productService.getProductsByCategory(categoryId, pageNumber, pageSize, sortBy, sortOrder));
+        return ResponseEntity.ok(
+                productService.getProductsByCategory(categoryId, pageNumber, pageSize, sortBy, sortOrder));
     }
 }

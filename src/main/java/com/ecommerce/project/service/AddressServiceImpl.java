@@ -1,8 +1,8 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.exception.ResourceNotFoundException;
 import com.ecommerce.project.model.Address;
@@ -10,11 +10,10 @@ import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.AddressRepository;
 import com.ecommerce.project.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -42,7 +41,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressDetailResponse getAddressById(Long userId, Long id) {
         User user = fetchUser(userId);
-        Address address = addressRepository.findByIdAndUser(id, user)
+        Address address = addressRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
         return modelMapper.map(address, AddressDetailResponse.class);
     }
@@ -59,7 +59,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressDetailResponse updateAddress(Long userId, Long id, AddressUpdateRequest request) {
         User user = fetchUser(userId);
-        Address address = addressRepository.findByIdAndUser(id, user)
+        Address address = addressRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
 
         address.setStreetLine1(request.getStreetLine1());
@@ -75,13 +76,13 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public void deleteAddress(Long userId, Long id) {
         User user = fetchUser(userId);
-        Address address = addressRepository.findByIdAndUser(id, user)
+        Address address = addressRepository
+                .findByIdAndUser(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", id));
         addressRepository.delete(address);
     }
 
     private User fetchUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
     }
 }

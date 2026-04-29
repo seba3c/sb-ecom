@@ -1,21 +1,19 @@
 package com.ecommerce.project.security.jwt;
 
-import tools.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.AuthenticationException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class JwtAuthEntryPointTest {
@@ -40,11 +38,17 @@ class JwtAuthEntryPointTest {
         when(authException.getMessage()).thenReturn("Full authentication is required");
         when(response.getOutputStream()).thenReturn(new jakarta.servlet.ServletOutputStream() {
             @Override
-            public boolean isReady() { return true; }
+            public boolean isReady() {
+                return true;
+            }
+
             @Override
             public void setWriteListener(jakarta.servlet.WriteListener writeListener) {}
+
             @Override
-            public void write(int b) { outputStream.write(b); }
+            public void write(int b) {
+                outputStream.write(b);
+            }
         });
 
         entryPoint.commence(request, response, authException);

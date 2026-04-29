@@ -1,7 +1,12 @@
 package com.ecommerce.project.util;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.security.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthUtilsTest {
@@ -35,8 +34,7 @@ class AuthUtilsTest {
         user = new User("testuser", "test@example.com", "password");
         user.setId(1L);
 
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken("testuser", null, List.of());
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken("testuser", null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 

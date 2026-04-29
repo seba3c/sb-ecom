@@ -1,9 +1,14 @@
 package com.ecommerce.project.security.jwt;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
+import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,12 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import javax.crypto.SecretKey;
-import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwtParserTest {
@@ -81,7 +80,7 @@ class JwtParserTest {
     @Test
     void getJwtFromCookie_withMatchingCookie_returnsToken() {
         String token = buildToken("alice");
-        Cookie[] cookies = { new Cookie("ecommerce-app", token) };
+        Cookie[] cookies = {new Cookie("ecommerce-app", token)};
         when(request.getCookies()).thenReturn(cookies);
 
         String result = jwtParser.getJwtFromCookie(request);

@@ -14,6 +14,9 @@ import com.ecommerce.project.repository.CartRepository;
 import com.ecommerce.project.repository.ProductRepository;
 import com.ecommerce.project.security.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,10 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Transactional
@@ -50,7 +49,8 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = fetchOrCreateCart(userId);
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
         if (product.getQuantity() < quantity) {
@@ -78,10 +78,12 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = fetchCart(userId);
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
-        CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
+        CartItem item = cartItemRepository
+                .findByCartAndProduct(cart, product)
                 .orElseThrow(() -> new APIException("Product not found in cart"));
 
         if (product.getQuantity() < quantity) {
@@ -98,10 +100,12 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = fetchCart(userId);
 
-        Product product = productRepository.findById(productId)
+        Product product = productRepository
+                .findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
 
-        CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
+        CartItem item = cartItemRepository
+                .findByCartAndProduct(cart, product)
                 .orElseThrow(() -> new APIException("Product not found in cart"));
 
         cart.getCartItems().remove(item);
@@ -140,15 +144,15 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartListResponse toCartListResponse(Page<Cart> page) {
-        List<CartDetailResponse> carts = page.getContent().stream().map(this::toCartDetailResponse).toList();
-        return new CartListResponse(carts, page.getNumber(), page.getSize(),
-                page.getTotalElements(), page.getTotalPages(), page.isLast());
+        List<CartDetailResponse> carts =
+                page.getContent().stream().map(this::toCartDetailResponse).toList();
+        return new CartListResponse(
+                carts, page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages(), page.isLast());
     }
 
     private void recalculateTotalPrice(Cart cart) {
         BigDecimal total = cart.getCartItems().stream()
-                .map(i -> i.getPrice().subtract(i.getDiscount())
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
+                .map(i -> i.getPrice().subtract(i.getDiscount()).multiply(BigDecimal.valueOf(i.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         cart.setTotalPrice(total);
     }
@@ -162,19 +166,17 @@ public class CartServiceImpl implements CartService {
     }
 
     private Cart fetchOrCreateCart(Long userId) {
-        return cartRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-                    Cart newCart = new Cart();
-                    newCart.setUser(user);
-                    return cartRepository.save(newCart);
-                });
+        return cartRepository.findByUserId(userId).orElseGet(() -> {
+            User user = userRepository
+                    .findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+            Cart newCart = new Cart();
+            newCart.setUser(user);
+            return cartRepository.save(newCart);
+        });
     }
 
     private Cart fetchCart(Long userId) {
-        return cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new APIException("Cart not found"));
+        return cartRepository.findByUserId(userId).orElseThrow(() -> new APIException("Cart not found"));
     }
-
 }

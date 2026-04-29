@@ -11,6 +11,5 @@ public interface OrderService {
             String pgName,
             String pgPaymentId,
             String pgStatus,
-            String pgResponse
-    );
+            String pgResponse);
 }

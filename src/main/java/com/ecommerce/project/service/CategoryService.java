@@ -1,8 +1,8 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryDetailResponse;
 import com.ecommerce.project.dto.CategoryListResponse;
-import com.ecommerce.project.dto.CategoryCreateRequest;
 import com.ecommerce.project.dto.CategoryUpdateRequest;
 
 public interface CategoryService {

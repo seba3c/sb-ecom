@@ -1,5 +1,13 @@
 package com.ecommerce.project.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.ecommerce.project.dto.CartDetailResponse;
 import com.ecommerce.project.dto.CartItemDetail;
 import com.ecommerce.project.dto.CartListResponse;
@@ -11,24 +19,15 @@ import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.service.UserDetailsServiceImpl;
 import com.ecommerce.project.service.CartService;
 import com.ecommerce.project.util.AuthUtils;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CartController.class)
 class CartControllerTest {
@@ -58,7 +57,8 @@ class CartControllerTest {
     }
 
     private CartDetailResponse sampleCart() {
-        ProductDetailResponse product = new ProductDetailResponse(1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
+        ProductDetailResponse product = new ProductDetailResponse(
+                1L, "Laptop Pro", "desc", 10, BigDecimal.valueOf(999.99), BigDecimal.ZERO, null);
         CartItemDetail item = new CartItemDetail(1L, 2, BigDecimal.valueOf(999.99), BigDecimal.ZERO, product);
         CartDetailResponse cart = new CartDetailResponse();
         cart.setId(1L);
@@ -79,8 +79,7 @@ class CartControllerTest {
 
     @Test
     void addProductToCart_invalidQuantity_returns400() throws Exception {
-        mockMvc.perform(post("/api/my_cart/1/quantity/0"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/my_cart/1/quantity/0")).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -88,8 +87,7 @@ class CartControllerTest {
         when(cartService.addProductToCart(anyLong(), eq(99L), any()))
                 .thenThrow(new ResourceNotFoundException("Product", "id", 99L));
 
-        mockMvc.perform(post("/api/my_cart/99/quantity/1"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/my_cart/99/quantity/1")).andExpect(status().isNotFound());
     }
 
     @Test
@@ -97,8 +95,7 @@ class CartControllerTest {
         when(cartService.addProductToCart(anyLong(), anyLong(), any()))
                 .thenThrow(new APIException("Product already in cart. Use PUT to update quantity."));
 
-        mockMvc.perform(post("/api/my_cart/1/quantity/2"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/my_cart/1/quantity/2")).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -113,8 +110,7 @@ class CartControllerTest {
 
     @Test
     void updateProductQuantity_invalidQuantity_returns400() throws Exception {
-        mockMvc.perform(put("/api/my_cart/1/quantity/0"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(put("/api/my_cart/1/quantity/0")).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -122,8 +118,7 @@ class CartControllerTest {
         when(cartService.updateProductQuantity(anyLong(), eq(99L), any()))
                 .thenThrow(new APIException("Product not found in cart"));
 
-        mockMvc.perform(put("/api/my_cart/99/quantity/3"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(put("/api/my_cart/99/quantity/3")).andExpect(status().isBadRequest());
     }
 
     @Test

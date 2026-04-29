@@ -45,5 +45,4 @@ public class JwtUtils {
     public ResponseCookie generateJwtCleanCookie() {
         return jwtGenerator.generateJwtCleanCookie();
     }
-
 }

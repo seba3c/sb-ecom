@@ -2,11 +2,10 @@ package com.ecommerce.project.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import java.math.BigDecimal;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "order_items")

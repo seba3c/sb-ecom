@@ -1,5 +1,10 @@
 package com.ecommerce.project.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
@@ -9,20 +14,14 @@ import com.ecommerce.project.model.Address;
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.repository.AddressRepository;
 import com.ecommerce.project.security.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AddressServiceImplTest {
@@ -57,8 +56,10 @@ class AddressServiceImplTest {
         address2.setState("CA");
         address2.setCountry("USA");
         address2.setZipCode("90001");
-        AddressDetailResponse dto1 = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
-        AddressDetailResponse dto2 = new AddressDetailResponse(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
+        AddressDetailResponse dto1 =
+                new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse dto2 =
+                new AddressDetailResponse(2L, "456 Oak Ave", null, "Los Angeles", "CA", "USA", "90001");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByUser(user)).thenReturn(List.of(address1, address2));
@@ -93,7 +94,8 @@ class AddressServiceImplTest {
         address.setState("NY");
         address.setCountry("USA");
         address.setZipCode("10001");
-        AddressDetailResponse dto = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse dto =
+                new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(address));
@@ -112,8 +114,7 @@ class AddressServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> addressService.getAddressById(1L, 99L));
+        assertThrows(ResourceNotFoundException.class, () -> addressService.getAddressById(1L, 99L));
     }
 
     @Test
@@ -134,7 +135,8 @@ class AddressServiceImplTest {
         savedAddress.setState("NY");
         savedAddress.setCountry("USA");
         savedAddress.setZipCode("10001");
-        AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
+        AddressDetailResponse resultDTO =
+                new AddressDetailResponse(1L, "123 Main St", null, "New York", "NY", "USA", "10001");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(modelMapper.map(request, Address.class)).thenReturn(mappedAddress);
@@ -156,7 +158,8 @@ class AddressServiceImplTest {
         Address existingAddress = new Address();
         existingAddress.setId(1L);
         existingAddress.setStreetLine1("123 Main St");
-        AddressDetailResponse resultDTO = new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
+        AddressDetailResponse resultDTO =
+                new AddressDetailResponse(1L, "Updated St", null, "Boston", "MA", "USA", "02101");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(1L, user)).thenReturn(Optional.of(existingAddress));
@@ -184,8 +187,7 @@ class AddressServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> addressService.updateAddress(1L, 99L, request));
+        assertThrows(ResourceNotFoundException.class, () -> addressService.updateAddress(1L, 99L, request));
     }
 
     @Test
@@ -211,7 +213,6 @@ class AddressServiceImplTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(addressRepository.findByIdAndUser(99L, user)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class,
-                () -> addressService.deleteAddress(1L, 99L));
+        assertThrows(ResourceNotFoundException.class, () -> addressService.deleteAddress(1L, 99L));
     }
 }

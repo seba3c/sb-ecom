@@ -2,13 +2,12 @@ package com.ecommerce.project.security.jwt;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import java.security.Key;
-import java.util.Date;
 
 @Component
 public class JwtGenerator {
@@ -43,10 +42,7 @@ public class JwtGenerator {
     }
 
     public ResponseCookie generateJwtCleanCookie() {
-        return ResponseCookie.from(jwtCookie, "")
-                .path("/api")
-                .maxAge(0)
-                .build();
+        return ResponseCookie.from(jwtCookie, "").path("/api").maxAge(0).build();
     }
 
     private Key key() {

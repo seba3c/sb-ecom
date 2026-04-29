@@ -12,7 +12,10 @@ import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.repository.RoleRepository;
 import com.ecommerce.project.security.repository.UserRepository;
 import com.ecommerce.project.security.service.UserDetailsImpl;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,11 +28,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,8 +54,8 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         Authentication authentication;
         try {
-            authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         } catch (AuthenticationException exception) {
             Map<String, Object> map = new HashMap<>();
             map.put("message", "Bad credentials");
@@ -66,15 +65,15 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserDetailsImpl userDetails = Objects.requireNonNull(
-                (UserDetailsImpl) authentication.getPrincipal());
+        UserDetailsImpl userDetails = Objects.requireNonNull((UserDetailsImpl) authentication.getPrincipal());
 
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
         UserInfoResponse response = getUserInfoResponse(userDetails, jwtCookie.getValue());
 
-
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(response);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(response);
     }
 
     private UserInfoResponse getUserInfoResponse(UserDetailsImpl userDetails, String jwtToken) {
@@ -89,22 +88,15 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
 
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(
-                    new MessageResponse("Error: Username is already taken!")
-            );
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(
-                    new MessageResponse("Error: Email is already taken!")
-            );
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already taken!"));
         }
 
         User user = new User(
-                signupRequest.getUsername(),
-                signupRequest.getEmail(),
-                encoder.encode(signupRequest.getPassword())
-        );
+                signupRequest.getUsername(), signupRequest.getEmail(), encoder.encode(signupRequest.getPassword()));
 
         user.setRoles(resolveRoles(signupRequest.getRoles()));
         userRepository.save(user);
@@ -115,16 +107,20 @@ public class AuthController {
     private Set<Role> resolveRoles(Set<String> strRoles) {
         Set<Role> roles = new HashSet<>();
         if (strRoles == null) {
-            roles.add(roleRepository.findByName(AppRole.ROLE_USER)
+            roles.add(roleRepository
+                    .findByName(AppRole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin" -> roles.add(roleRepository.findByName(AppRole.ROLE_ADMIN)
+                    case "admin" -> roles.add(roleRepository
+                            .findByName(AppRole.ROLE_ADMIN)
                             .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-                    case "seller" -> roles.add(roleRepository.findByName(AppRole.ROLE_SELLER)
+                    case "seller" -> roles.add(roleRepository
+                            .findByName(AppRole.ROLE_SELLER)
                             .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-                    default -> roles.add(roleRepository.findByName(AppRole.ROLE_USER)
+                    default -> roles.add(roleRepository
+                            .findByName(AppRole.ROLE_USER)
                             .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
                 }
             });
@@ -145,8 +141,7 @@ public class AuthController {
     public ResponseEntity<?> currentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            UserDetailsImpl userDetails = Objects.requireNonNull(
-                    (UserDetailsImpl) authentication.getPrincipal());
+            UserDetailsImpl userDetails = Objects.requireNonNull((UserDetailsImpl) authentication.getPrincipal());
             UserInfoResponse response = getUserInfoResponse(userDetails, null);
             return ResponseEntity.ok(response);
         }
@@ -156,11 +151,14 @@ public class AuthController {
     @PostMapping("/signout")
     public ResponseEntity<?> signOut() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
             return ResponseEntity.badRequest().body(new MessageResponse("No user signed in"));
         }
         ResponseCookie jwtCookie = jwtUtils.generateJwtCleanCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(new MessageResponse("User signed out successfully!"));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(new MessageResponse("User signed out successfully!"));
     }
-
 }

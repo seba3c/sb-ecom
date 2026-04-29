@@ -1,17 +1,17 @@
 package com.ecommerce.project.controller;
 
 import com.ecommerce.project.config.SwaggerConfig;
+import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressDetailResponse;
 import com.ecommerce.project.dto.AddressListResponse;
-import com.ecommerce.project.dto.AddressCreateRequest;
 import com.ecommerce.project.dto.AddressUpdateRequest;
 import com.ecommerce.project.service.AddressService;
 import com.ecommerce.project.util.AuthUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +27,7 @@ public class AddressController {
 
     @GetMapping
     public ResponseEntity<AddressListResponse> getAllAddresses() {
+
         Long userId = authUtils.loggedInUser().getId();
         return ResponseEntity.ok(addressService.getAllAddresses(userId));
     }
@@ -44,7 +45,8 @@ public class AddressController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AddressDetailResponse> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressUpdateRequest request) {
+    public ResponseEntity<AddressDetailResponse> updateAddress(
+            @PathVariable Long id, @Valid @RequestBody AddressUpdateRequest request) {
         Long userId = authUtils.loggedInUser().getId();
         return ResponseEntity.ok(addressService.updateAddress(userId, id, request));
     }

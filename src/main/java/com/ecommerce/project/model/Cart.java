@@ -1,13 +1,12 @@
 package com.ecommerce.project.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "carts")
