@@ -51,7 +51,7 @@ tasks.withType<Test> {
 
 spotless {
     java {
-        googleJavaFormat()
+        palantirJavaFormat()
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
