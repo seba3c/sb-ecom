@@ -27,6 +27,7 @@ public class AddressController {
 
     @GetMapping
     public ResponseEntity<AddressListResponse> getAllAddresses() {
+
         Long userId = authUtils.loggedInUser().getId();
         return ResponseEntity.ok(addressService.getAllAddresses(userId));
     }
