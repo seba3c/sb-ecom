@@ -63,3 +63,4 @@ out/
 
 .gemini/
 gha-creds-*.json
+/env
