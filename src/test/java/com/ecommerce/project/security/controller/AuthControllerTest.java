@@ -191,12 +191,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void signup_withAdminRole_assignsRoleAdmin() throws Exception {
-        when(userRepository.existsByUsername("admin")).thenReturn(false);
-        when(userRepository.existsByEmail("admin@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("adminpass")).thenReturn("encoded");
-        when(roleRepository.findByName(AppRole.ROLE_ADMIN)).thenReturn(Optional.of(new Role(AppRole.ROLE_ADMIN)));
-
+    void signup_withAdminRole_returnsBadRequest() throws Exception {
         SignupRequest signupRequest = new SignupRequest();
         signupRequest.setUsername("admin");
         signupRequest.setEmail("admin@example.com");
@@ -206,8 +201,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User registered successfully!"));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

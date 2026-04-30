@@ -21,6 +21,7 @@ public class SignupRequest {
     @Email
     private String email;
 
+    @ValidRoles
     private Set<String> roles;
 
     @NotBlank

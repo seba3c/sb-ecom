@@ -105,27 +105,13 @@ public class AuthController {
     }
 
     private Set<Role> resolveRoles(Set<String> strRoles) {
-        Set<Role> roles = new HashSet<>();
-        if (strRoles == null) {
-            roles.add(roleRepository
-                    .findByName(AppRole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin" -> roles.add(roleRepository
-                            .findByName(AppRole.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-                    case "seller" -> roles.add(roleRepository
-                            .findByName(AppRole.ROLE_SELLER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-                    default -> roles.add(roleRepository
-                            .findByName(AppRole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
-                }
-            });
-        }
-        return roles;
+        Set<String> names = (strRoles == null || strRoles.isEmpty()) ? Set.of("user") : strRoles;
+        return names.stream()
+                .map(role -> "seller".equals(role) ? AppRole.ROLE_SELLER : AppRole.ROLE_USER)
+                .map(appRole -> roleRepository
+                        .findByName(appRole)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found.")))
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     @GetMapping("/username")
